@@ -36,12 +36,15 @@ typedef struct {
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI);
 void TM_parser_FULLSTATE(uint8_t * buf);
 void TM_parser_MINISTATE(uint8_t * buf);
-void TM_file_write();
 
 uint8_t TM_getRSSIPercentage();
 uint8_t TM_getFlightState();
 geocord_t TM_getGeoLatitude();
 geocord_t TM_getGeoLongitude();
+float     TM_getGeoAltitude();
 float TM_getAltitudeKM();
 float TM_getVelocity();
 float TM_getMach();
+float TM_getDistance2target();
+float TM_getDir2target();
+void  TM_file_write();

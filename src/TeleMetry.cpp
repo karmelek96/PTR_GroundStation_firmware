@@ -1,9 +1,10 @@
 #include <math.h>
+#include <string.h>
 #include "LORA_typedefs.h"
-#include "TeleMetry.h"
+#include "GNSS.h"
 #include "SPIFFS.h"
 #include "FileSys.h"
-#include <string>
+#include "TeleMetry.h"
 
 static lora_bin_packet_t 		lora_bin_packet_d;
 static lora_binmin_packet_t 	lora_binmin_packet_d;
@@ -11,6 +12,10 @@ static lora_binmin_packet_t 	lora_binmin_packet_d;
 static rocket_state_t rocket_state_d;
 geocord_t lastvalid_lat = {0.0f, 'N'};
 geocord_t lastvalid_lon = {0.0f, 'E'};
+float 	  lastvalid_altitude = 0.0f;
+
+float distance2target = 0.0f;
+float dir2target = 0.0f;
 
 float TM_RSSI = -200.0f;
 
@@ -71,21 +76,28 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 		lastvalid_lon.cord = rocket_state_d.gnss_lon.cord;
 	}
 
+	distance2target = GNSS_calcDistance(lastvalid_lat.cord, lastvalid_lon.cord);
+	dir2target		= GNSS_calcDir(0.0f, lastvalid_lat.cord, lastvalid_lon.cord);
+
 	char bufer[256];
-	sprintf(bufer, "%f,%f,0x%x,"
+	sprintf(bufer, "%i,%i,0x%x,"
 					"%.2f,%.2f,%.2f,"
 					"%.2f,%.2f,%.2f,"
 					"%.2f,"
 					"%.0f,%.0f,%0.1f,"
 					"%lf,%lf,"
-					"%.1f,%f,%f", 	
+					"%.1f,%i,%i"
+					"%lf,%lf,%i,%i,"
+					"%.3f,%.0f", 	
 								rocket_state_d.timestamp_ms, rocket_state_d.state, rocket_state_d.flags,
 								rocket_state_d.accX, rocket_state_d.accY, rocket_state_d.accZ,
 								rocket_state_d.gyroX, rocket_state_d.gyroY, rocket_state_d.gyroZ,
 								rocket_state_d.tilt,
 								rocket_state_d.pressure, rocket_state_d.altitude, rocket_state_d.velocity,
 								rocket_state_d.gnss_lat.cord, rocket_state_d.gnss_lon.cord,
-								rocket_state_d.gnss_altitude, rocket_state_d.fix, rocket_state_d.sats);
+								rocket_state_d.gnss_altitude, rocket_state_d.fix, rocket_state_d.sats,
+								GNSS_getOwnLat(), GNSS_getOwnLon(), GNSS_getOwnFix(), GNSS_getOwnFix(),
+								distance2target, dir2target);
 	Serial.println(bufer);
 
 
@@ -120,6 +132,10 @@ geocord_t TM_getGeoLongitude(){
 	//return rocket_state_d.gnss_lon;
 }
 
+float TM_getGeoAltitude(){
+	return lastvalid_altitude;
+}
+
 float TM_getAltitudeKM(){
 	return rocket_state_d.altitude/1000.0f;
 }
@@ -152,9 +168,23 @@ float TM_getMach(){
 	return rocket_state_d.velocity / getMachAtAltitude(rocket_state_d.altitude);
 }
 
+float TM_getDistance2target(){
+	return distance2target;
+}
+
+float TM_getDir2target(){
+	return dir2target;
+}
+
 void TM_file_write(){
 	char s[1000];
-	sprintf(s, "%ld,%d,%i,%i,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%c,%f,%c,%f,%d,%d\n", 
+	sprintf(s, "%ld,%d,%i,%i,"	//sys state
+				"%f,%f,%f,"		//acc
+				"%f,%f,%f,"		//gyro
+				"%f,%f,%f,%f,%f,"	//tilt, press, velo, alti
+				"%c,%f,%c,%f,%d,%d,"//geo
+				"%f,%f,%d,%d,"		//own geo
+				"%f,%f\n", 			//distance, dir
 	rocket_state_d.timestamp_ms, 
 	rocket_state_d.packet_no, 
 	rocket_state_d.state, 
@@ -169,12 +199,12 @@ void TM_file_write(){
 	rocket_state_d.pressure, 
 	rocket_state_d.velocity, 
 	rocket_state_d.altitude,
-	rocket_state_d.gnss_lat.cord, 
-	rocket_state_d.gnss_lat.sign, 
-	rocket_state_d.gnss_lon.cord,
-	rocket_state_d.gnss_lon.sign, 
+	rocket_state_d.gnss_lat.cord, rocket_state_d.gnss_lat.sign, 
+	rocket_state_d.gnss_lon.cord, rocket_state_d.gnss_lon.sign, 
 	rocket_state_d.gnss_altitude, 
-	rocket_state_d.fix, 
-	rocket_state_d.sats);
+	rocket_state_d.fix, rocket_state_d.sats,
+	GNSS_getOwnLat(), GNSS_getOwnLon(),
+	GNSS_getOwnFix(), GNSS_getOwnSat(),
+	distance2target, dir2target);
 	appendFile(SPIFFS, "/log.csv", s);
 }

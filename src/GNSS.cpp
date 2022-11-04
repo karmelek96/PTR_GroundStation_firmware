@@ -10,9 +10,10 @@ char nmeaBuffer[100];
 MicroNMEA nmea(nmeaBuffer, sizeof(nmeaBuffer));
 
 //----- Global vars --------
-float myLat   = 0.0f;
-float myLon   = 0.0f;
-uint8_t myFix = 0;
+float myLat    = 0.0f;
+float myLon    = 0.0f;
+uint8_t myFix  = 0;
+uint8_t mySats = 0;
 
 void GNSS_init(){
     Serial1.begin(9600, SERIAL_8N1, 34, 12);
@@ -31,8 +32,10 @@ void GNSS_srv(){
             myLat = latitude_mdeg  / 1000000.0f;
             myLon = longitude_mdeg / 1000000.0f;
             myFix = 1;
+            mySats = nmea.getNumSatellites();
         } else {
             myFix = 0;
+            mySats = 0;
         }
     }
 }
@@ -54,7 +57,7 @@ float GNSS_calcDistance(float targetLat, float targetLon){
     dist = dist * 1.609344f;
     // myLat
     // myLon
-    return 0.0f;
+    return dist;
 }
 
 float GNSS_calcDir(float deviceAzimuth, float targetLat, float targetLon){
@@ -81,6 +84,14 @@ float GNSS_getOwnLat(){
 
 float GNSS_getOwnLon(){
     return myLon;
+}
+
+uint8_t GNSS_getOwnFix(){
+    return myFix;
+}
+
+uint8_t GNSS_getOwnSat(){
+    return mySats;
 }
 
 void SFE_UBLOX_GNSS::processNMEA(char incoming)

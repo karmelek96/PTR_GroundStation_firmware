@@ -8,7 +8,8 @@ bool FS_init(){
         return false;
     }
     appendFile(SPIFFS, "/log.csv", "\nThis is beginning of new telemetry receiving file, this happensafter every restart of TTGO\n");
-    appendFile(SPIFFS, "/log.csv", "Timestamp,packet_no,state,flags,accX,accY,accZ,gyroX,gyroY,gyroZ,tilt,pressure,velocity,altitude,lat,lat_sign,lon,lon_sign,altitude_gnss,fix,sats\n");
+    appendFile(SPIFFS, "/log.csv", "Timestamp,packet_no,state,flags,accX,accY,accZ,gyroX,gyroY,gyroZ,tilt,pressure,velocity,altitude,lat,lat_sign,lon,lon_sign,altitude_gnss,fix,sats,"
+                        "lat_own,lon_own,fix_own,stas_own,distance,direction\n");
 
     return true;
 

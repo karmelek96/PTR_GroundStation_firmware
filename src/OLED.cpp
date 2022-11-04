@@ -36,16 +36,40 @@ void OLED_refresh(){
         OLED_previousMillis = OLED_currentMillis;
 
         display.clear();
-        //OLED_drawRocketLaunch();
-        OLED_drawFinder();
+        OLED_drawRocketLaunch();
+        //OLED_drawFinder();
         display.display();
     }
+}
+
+void OLED_drawProgressBar(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t progress){
+  uint16_t radius = height / 2;
+  uint16_t xRadius = x + radius;
+  uint16_t yRadius = y + radius;
+  uint16_t doubleRadius = 2 * radius;
+  uint16_t innerRadius = radius - 2;
+
+  display.setColor(WHITE);
+  uint16_t maxProgressWidth = (width - doubleRadius + 1) * progress / 100;
+  display.fillRect(x, y, maxProgressWidth, height);
+  display.drawHorizontalLine(x, y + radius, width);
+
+  display.setColor(BLACK);
+  for(uint8_t i=0; (i*8) < width; i++){
+    //drawVerticalLine(x + 8*i, y, height);
+    display.drawLine(x + 8*i, y,            x + 8*i + 4,     y + radius);
+    display.drawLine(x + 8*i, y+height-1,   x + 8*i + 4,     y + radius);
+    display.drawLine(x + 8*i+1, y,          x + 8*i + 4 + 1, y + radius);
+    display.drawLine(x + 8*i+1, y+height-1, x + 8*i + 4 + 1, y + radius);
+  }
+
+  display.setColor(WHITE);
 }
 
 void OLED_drawRocketLaunch(){
   
   // RSSI bar
-  display.drawProgressBar(0,0, 72, 9, LORA_checkTimeout()?TM_getRSSIPercentage():0);
+  OLED_drawProgressBar(0,0, 72, 9, LORA_checkTimeout()?TM_getRSSIPercentage():0);
   display.setTextAlignment(TEXT_ALIGN_RIGHT);
   display.setFont(ArialMT_Plain_10); 
   display.drawStringf(127, 0, buffer, "%3.0f Ppm", LORA_getPacketRate());
@@ -57,27 +81,30 @@ void OLED_drawRocketLaunch(){
   // display.drawStringf(0,  13, buffer,"%.1f km",   TM_getAltitudeKM());
   // display.drawStringf(63, 13, buffer,"Mach %.1f", TM_getMach());
 
-  // GEO
+  // GEO target
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10); 
-  display.drawStringf(0, 43, buffer, "%c%.7f", TM_getGeoLatitude().sign, fabs(TM_getGeoLatitude().cord));
+  display.drawStringf(0, 13, buffer,"%.3f km", TM_getGeoAltitude());
+  display.drawStringf(0, 43, buffer, "%c%.7f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
   display.drawStringf(0, 52, buffer, "%c%.7f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
+
+  // GEO own
   display.drawStringf(0, 23, buffer, "%c%.7f", ' ', fabs(GNSS_getOwnLat()));
   display.drawStringf(0, 34, buffer, "%c%.7f", ' ', fabs(GNSS_getOwnLon()));
 
   display.setTextAlignment(TEXT_ALIGN_RIGHT);
   display.setFont(ArialMT_Plain_10); 
-  float distance = GNSS_calcDistance(TM_getGeoLatitude().cord, TM_getGeoLongitude().cord);
-  float direction = GNSS_calcDir(0.0f, TM_getGeoLatitude().cord, TM_getGeoLongitude().cord);
+  
+  float distance = TM_getDistance2target();
   if(distance < 0.0f){
     display.drawString(127, 43, "---- km");
     display.drawString(127, 52, "---- deg");
   } else if(distance < 1000.0f){
     display.drawStringf(127, 43, buffer, "%.0f m", distance * 1000.0f);
-    display.drawStringf(127, 52, buffer, "%.0f deg", direction);
+    display.drawStringf(127, 52, buffer, "%.0f deg", TM_getDir2target());
   } else {
     display.drawStringf(127, 43, buffer, "%.1f km", distance);
-    display.drawStringf(127, 52, buffer, "%.0f deg", direction);
+    display.drawStringf(127, 52, buffer, "%.0f deg", TM_getDir2target());
   }
   
 
@@ -170,7 +197,7 @@ void OLED_drawFinder(){
   }
   
   // Compass
-  if(distance > 5.0f)
+  if(distance > 0.01f)  //distance > 10m
     OLED_drawCompass(103, 39, Sensors_getAzm(), Sensors_getPitch(), Sensors_getRoll());
 
   if(LORA_newPacketReceiver()){
