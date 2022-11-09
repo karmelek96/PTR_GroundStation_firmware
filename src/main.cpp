@@ -9,6 +9,7 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include "FileSys.h"
+#include "mavlink_driver.h"
 
 //#include "OLEDDisplayUi.h"
 
@@ -67,7 +68,7 @@ void setup() {
   
   server.begin();
   
-
+  MAVLink_init();
 
 
   LORA_startRX();
@@ -87,6 +88,7 @@ void loop() {
   //OLED handler
   OLED_refresh(); 
 
+  MAVLink_srv();
 
   
 }
