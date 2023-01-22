@@ -50,9 +50,7 @@ void setup() {
     request->send(SPIFFS, "/index.html", "text/html", false);
   });
   
-   server.on("/download", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/log.csv", "text/plain", true);
-  });
+  server.serveStatic("/download", SPIFFS, "/log.csv");
  
   server.on("/parse", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/log.csv", "text/plain", false);
