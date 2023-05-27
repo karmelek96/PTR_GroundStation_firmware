@@ -8,3 +8,4 @@ uint8_t LORA_checkTimeout();
 uint8_t LORA_newPacketReceiver();
 void LORA_PacketCounter();
 float LORA_getPacketRate();
+bool LORA_changeFrequency(int freq);

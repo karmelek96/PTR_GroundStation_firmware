@@ -9,8 +9,8 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include "FileSys.h"
-#include "mavlink_driver.h"
-
+#include "string.h"
+#include "Arduino.h"
 //#include "OLEDDisplayUi.h"
 
 // 0x34  - AXP192
@@ -63,10 +63,29 @@ void setup() {
     deleteFile(SPIFFS, "/log.csv");
     request->send(200, "text/plain", "Succesfully deleted file!");
   });
+
+  server.on("/setFreq", HTTP_POST, [](AsyncWebServerRequest *request){
+    String temp;
+    int freq;
+    temp = request->getParam("freq", true)->value();
+    freq = temp.toInt();
+    Serial.printf("Received method: %s \n", temp);
+    if(freq >= 430000 && freq <= 440000){
+      if(LORA_changeFrequency(freq)){
+        request->send(200, "text/plain", "Succesfully changed frequency to " + (String)(freq) );
+      }
+      else{
+        request->send(200, "text/plain", "Failed to change frequency!");
+      }
+    }
+    else{
+      request->send(200, "text/plain", "Frequency not in range!");
+    }
+  });
+
   
   server.begin();
   
-  MAVLink_init();
 
 
   LORA_startRX();
@@ -86,7 +105,6 @@ void loop() {
   //OLED handler
   OLED_refresh(); 
 
-  MAVLink_srv();
 
   
 }
