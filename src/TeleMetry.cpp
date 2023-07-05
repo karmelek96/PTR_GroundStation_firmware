@@ -74,6 +74,7 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 		lastvalid_lat.cord = rocket_state_d.gnss_lat.cord;
 		lastvalid_lon.sign = rocket_state_d.gnss_lon.sign;
 		lastvalid_lon.cord = rocket_state_d.gnss_lon.cord;
+		lastvalid_altitude = rocket_state_d.gnss_altitude;
 	}
 
 	distance2target = GNSS_calcDistance(lastvalid_lat.cord, lastvalid_lon.cord);

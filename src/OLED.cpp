@@ -84,7 +84,13 @@ void OLED_drawRocketLaunch(){
   // GEO target
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10); 
-  display.drawStringf(0, 13, buffer,"%.3f km", TM_getGeoAltitude());
+  if(TM_getGeoAltitude() < 1000.0f){
+    display.drawStringf(0, 13, buffer,"%.2f m", TM_getGeoAltitude());
+  }
+  else{
+     display.drawStringf(0, 13, buffer,"%.2f km", TM_getGeoAltitude() / 1000.0f);
+  }
+  
   display.drawStringf(0, 23, buffer, "%c%.7f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
   display.drawStringf(0, 33, buffer, "%c%.7f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
 
