@@ -19,6 +19,8 @@ float dir2target = 0.0f;
 
 float TM_RSSI = -200.0f;
 
+int TM_ID = 1; //Target ID
+
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 	//if(!TM_frameCheck(buf, len))
 	//		return;
@@ -47,6 +49,9 @@ void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 
 void TM_parser_FULLSTATE(uint8_t * buf){
 	//Serial.println(F("Full Telemetry!"));
+	if((((lora_bin_packet_t *)buf)->id) != TM_ID) {
+		return;
+	}
 	rocket_state_d.timestamp_ms = ((lora_bin_packet_t *)buf)->timestamp_ms;
 	rocket_state_d.packet_no = ((lora_bin_packet_t *)buf)->packet_no;
 	rocket_state_d.state = ((lora_bin_packet_t *)buf)->state;
@@ -68,6 +73,7 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 	rocket_state_d.gnss_altitude = ((float)((lora_bin_packet_t *)buf)->alti_gps)  / 1000.0f;
 	rocket_state_d.fix = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) >> 6;
 	rocket_state_d.sats = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) & 0x3F;
+	rocket_state_d.vbat = ((float)((lora_bin_packet_t *)buf)->vbat_10) / 10.0f;
 
 	if(rocket_state_d.fix > 0){
 		lastvalid_lat.sign = rocket_state_d.gnss_lat.sign;
@@ -177,6 +183,10 @@ float TM_getDir2target(){
 	return dir2target;
 }
 
+float TM_getVbat(){
+	return rocket_state_d.vbat;
+}
+
 void TM_file_write(){
 	char s[1000];
 	sprintf(s, "%ld,%d,%i,%i,"	//sys state
@@ -208,4 +218,13 @@ void TM_file_write(){
 	GNSS_getOwnFix(), GNSS_getOwnSat(),
 	distance2target, dir2target);
 	appendFile(SPIFFS, "/log.csv", s);
+}
+
+bool TM_changeID(int id) {
+	TM_ID = id;
+	return true;
+}
+
+int TM_getID() {
+	return TM_ID;
 }

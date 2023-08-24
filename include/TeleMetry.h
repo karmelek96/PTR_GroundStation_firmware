@@ -47,4 +47,7 @@ float TM_getVelocity();
 float TM_getMach();
 float TM_getDistance2target();
 float TM_getDir2target();
+float TM_getVbat();
 void  TM_file_write();
+bool TM_changeID(int id);
+int TM_getID();

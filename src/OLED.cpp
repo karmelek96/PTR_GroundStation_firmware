@@ -2,9 +2,11 @@
 #include "TeleMetry.h"
 #include "GNSS.h"
 #include "sensors.h"
+#include "Accessories.h"
 #include "lora.h"
 #include <Wire.h>
 #include "SH1106Wire.h"
+#include "SSD1306Wire.h"
 #include "OLED.h"
 
 //---------------- OLED declarations -------------------------
@@ -94,6 +96,10 @@ void OLED_drawRocketLaunch(){
   display.drawStringf(0, 23, buffer, "%c%.7f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
   display.drawStringf(0, 33, buffer, "%c%.7f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
 
+  //RF freq and ID
+  display.drawStringf(0, 43, buffer, "%.3fMHz", LORA_getCurrentFrequency());
+  display.drawStringf(0, 53, buffer, "ID: %d", TM_getID());
+
   // GEO own
   /*
   display.setTextAlignment(TEXT_ALIGN_RIGHT);
@@ -103,17 +109,21 @@ void OLED_drawRocketLaunch(){
   */
   display.setTextAlignment(TEXT_ALIGN_RIGHT);
   display.setFont(ArialMT_Plain_10); 
+
+  //voltages
+  display.drawStringf(127, 23, buffer, "vAvi: %.2f V", TM_getVbat());
+  display.drawStringf(127, 33, buffer, "vSta: %.2f V", Accessories_getVBat());
   
   float distance = TM_getDistance2target();
   if(distance < 0.0f){
     display.drawString(127, 43, "---- km");
     display.drawString(127, 52, "---- deg");
   } else if(distance < 1000.0f){
-    display.drawStringf(127, 43, buffer, "Distance: %.0f m", distance * 1000.0f);
-    display.drawStringf(127, 52, buffer, "Bearing: %.0f deg", TM_getDir2target());
+    display.drawStringf(127, 43, buffer, "RNG: %.0f m", distance * 1000.0f);
+    display.drawStringf(127, 52, buffer, "BRG: %.0f deg", TM_getDir2target());
   } else {
-    display.drawStringf(127, 43, buffer, "Distance: %.1f km", distance);
-    display.drawStringf(127, 52, buffer, "Bearing: %.0f deg", TM_getDir2target());
+    display.drawStringf(127, 43, buffer, "RNG: %.1f km", distance);
+    display.drawStringf(127, 52, buffer, "BRG: %.0f deg", TM_getDir2target());
   }
   
 
@@ -172,7 +182,7 @@ void OLED_drawRocketLaunch(){
   }
   //draw blinking dot
   if(OLED_newPacketCounter > 0){
-    display.fillCircle(100,30, 5);
+    display.fillCircle(80, 9, 3);
     OLED_newPacketCounter--;
   }
   
