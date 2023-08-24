@@ -83,6 +83,16 @@ void setup() {
     }
   });
 
+  server.on("/setID", HTTP_POST, [](AsyncWebServerRequest *request){
+    String temp;
+    int id;
+    temp = request->getParam("code", true)->value();
+    id = temp.toInt();
+    Serial.printf("Received method: %s \n", temp);
+    TM_changeID(id);
+    request->send(200, "text/plain", "Succesfully changed ID to " + (String)(id) );
+  });
+
   
   server.begin();
   

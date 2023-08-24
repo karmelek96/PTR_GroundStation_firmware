@@ -221,6 +221,7 @@ void TM_file_write(){
 }
 
 bool TM_changeID(int id) {
+	Serial.printf("Changing ID to %d \n", id);
 	TM_ID = id;
 	return true;
 }
