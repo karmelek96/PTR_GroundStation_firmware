@@ -29,6 +29,8 @@ void OLED_init(){
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
     display.clear();
+    display.drawXbm(0, 0, 128, 64, splash);
+    display.display();
     Serial.println(F("SSD1306 ready!"));
 }
 

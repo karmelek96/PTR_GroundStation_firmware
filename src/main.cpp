@@ -32,8 +32,8 @@ void setup() {
   //while (!Serial) delay(10); 
   Serial.begin(115200);
   Serial.println(F("App start!"));
-  FS_init();    Serial.println(F("FS init done!"));
   OLED_init();  Serial.println(F("OLED init done!"));
+  FS_init();    Serial.println(F("FS init done!"));
   GNSS_init();  Serial.println(F("GNSS init done!"));
   LORA_init();  Serial.println(F("LORA init done!"));
   //Sensors_init();  Serial.println(F("Sensors init done!"));
