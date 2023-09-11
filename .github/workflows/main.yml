@@ -10,10 +10,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # Setup PlatformIO in PATH
-      - name: Setup PlatformIO
-        uses: n-vr/setup-platformio-action@v1
-      
-      # Build the PlatformIO project
-      - name: Build PlatformIO project
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+          
+      - name: Pythine setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Build PlatformIO Project
         run: pio run
