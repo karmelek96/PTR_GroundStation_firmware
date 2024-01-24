@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>KPPTR</title>
@@ -8,15 +9,42 @@
                     e.preventDefault();
                 }
             }
-            </script>
+
+            function sendFrequency() {
+                var frequency = document.getElementById("frequencyInput").value;
+                console.log('freq="%d"', frequency);
+                var data = 'freq=' + frequency;
+                //POST_simple("/setFreq", data);
+                console.log("POST_simple return: " +  POST_simple("/setFreq", data));
+            }
+            
+            function sendID() {
+                var newID = document.getElementById("IDInput").value;
+                console.log('code="%d"', newID);
+                var data = 'code=' + newID;
+                //POST_simple("/setID", data);
+                console.log("POST_simple return: " +  POST_simple("/setID", data));
+            }   
+
+            function POST_simple(url, data) {
+                console.log("Fetching url: %s with data: %s", url, data);
+                return fetch(url, {method: "POST", headers: {'Content-Type': 'text/plain'}, body: data});
+            }
+        </script>
             
     </head>
     <body style=text-align:center;>
         <br><br><br><br><br><br><br>
         <a href="download" style="position:center;color:green; cursor:pointer; font-size:100px; text-decoration:none;">Download telemetry file</a>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br>
         <a href="delete" onclick="return confirm('Are you sure to delete all files?');" style="position:center; color:red; cursor:pointer; font-size:100px; text-decoration:none;">Delete telemetry file</a>
-
+        <br><br><br><br><br><br><br>
+        <h2>Change Frequency</h2>
+        <input type="number" id="frequencyInput" placeholder="Enter frequency">
+        <button onclick="sendFrequency()">Change Frequency</button>
+        <h2>Change ID</h2>
+        <input type="number" id="IDInput" placeholder="Enter ID">
+        <button onclick="sendID()">Change ID</button>
     </body>
 </html>
 

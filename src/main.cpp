@@ -9,8 +9,8 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include "FileSys.h"
-#include "mavlink_driver.h"
-
+#include "string.h"
+#include "Arduino.h"
 //#include "OLEDDisplayUi.h"
 
 // 0x34  - AXP192
@@ -32,8 +32,8 @@ void setup() {
   //while (!Serial) delay(10); 
   Serial.begin(115200);
   Serial.println(F("App start!"));
-  FS_init();    Serial.println(F("FS init done!"));
   OLED_init();  Serial.println(F("OLED init done!"));
+  FS_init();    Serial.println(F("FS init done!"));
   GNSS_init();  Serial.println(F("GNSS init done!"));
   LORA_init();  Serial.println(F("LORA init done!"));
   //Sensors_init();  Serial.println(F("Sensors init done!"));
@@ -63,10 +63,39 @@ void setup() {
     deleteFile(SPIFFS, "/log.csv");
     request->send(200, "text/plain", "Succesfully deleted file!");
   });
+
+  server.on("/setFreq", HTTP_POST, [](AsyncWebServerRequest *request){
+    String temp;
+    int freq;
+    temp = request->getParam("freq", true)->value();
+    freq = temp.toInt();
+    Serial.printf("Received method: %s \n", temp);
+    if(freq >= 430000 && freq <= 440000){
+      if(LORA_changeFrequency(freq)){
+        request->send(200, "text/plain", "Succesfully changed frequency to " + (String)(freq) );
+      }
+      else{
+        request->send(200, "text/plain", "Failed to change frequency!");
+      }
+    }
+    else{
+      request->send(200, "text/plain", "Frequency not in range!");
+    }
+  });
+
+  server.on("/setID", HTTP_POST, [](AsyncWebServerRequest *request){
+    String temp;
+    int id;
+    temp = request->getParam("code", true)->value();
+    id = temp.toInt();
+    Serial.printf("Received method: %s \n", temp);
+    TM_changeID(id);
+    request->send(200, "text/plain", "Succesfully changed ID to " + (String)(id) );
+  });
+
   
   server.begin();
   
-  MAVLink_init();
 
 
   LORA_startRX();
@@ -86,7 +115,6 @@ void loop() {
   //OLED handler
   OLED_refresh(); 
 
-  MAVLink_srv();
 
   
 }

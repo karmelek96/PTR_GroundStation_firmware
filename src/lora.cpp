@@ -3,6 +3,7 @@
 #include "TeleMetry.h"
 #include <SPI.h>
 #include <RadioLib.h>
+#include "FileSys.h"
 
 //---------------- LORA declarations -------------------------
 #define RADIO_SCLK_PIN              5
@@ -32,6 +33,11 @@ static uint16_t packetCounter[5] = {0,0,0,0,0};
 static float packet_rate = 0;
 static uint8_t LORA_newPacketReceivedOLED = 0;
 
+float LORA_currentFrequencyMHz = 434.25;
+
+
+
+
 
 void LORA_init(){
     Serial.print(F("[SX1278] Initializing ... "));
@@ -44,7 +50,7 @@ void LORA_init(){
         while (true);
     }
 
-    radio.setFrequency(433.0);
+    radio.setFrequency(434.25);
     radio.setBandwidth(125);        // 7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500
     radio.setSpreadingFactor(8);   // 6 - 12
     radio.setCodingRate(5);
@@ -149,3 +155,21 @@ void LORA_PacketCounter(){
 float LORA_getPacketRate(){
     return packet_rate;
 }
+
+bool LORA_changeFrequency(int freq){
+    double temp = (double)freq / 1000.0;
+
+    Serial.printf("Changing frequency to %f \n", (float)temp);
+    
+    if(radio.setFrequency((float)temp) != 0){
+        return false;
+    }
+    LORA_currentFrequencyMHz = ((float)freq / 1000);
+    LORA_startRX();
+    return true;
+}
+
+float LORA_getCurrentFrequency() {
+    return LORA_currentFrequencyMHz;
+}
+
