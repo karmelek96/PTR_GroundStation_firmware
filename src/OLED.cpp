@@ -8,6 +8,7 @@
 #include "SH1106Wire.h"
 #include "SSD1306Wire.h"
 #include "OLED.h"
+#include "Arduino.h"
 
 //---------------- OLED declarations -------------------------
 //static SSD1306Wire display(0x3c, SDA, SCL);
