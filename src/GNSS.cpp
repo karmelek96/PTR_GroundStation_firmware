@@ -4,6 +4,7 @@
 #include <MicroNMEA.h>
 #include "GNSS.h"
 
+
 //------ GNSS -------------
 SFE_UBLOX_GNSS myGNSS;
 char nmeaBuffer[100];
@@ -15,13 +16,19 @@ float myLon    = 0.0f;
 uint8_t myFix  = 0;
 uint8_t mySats = 0;
 
-void GNSS_init(){
+bool GNSS_init(){
     Serial1.begin(9600, SERIAL_8N1, 34, 12);
 
     if (myGNSS.begin(Serial1) == false) {
         Serial.println(F("Ublox init Failed. Freezing."));
         //while (1);
+        return false;
     }
+    return true;
+}
+
+double toRad(double degree) {
+    return degree/180 * M_PI;
 }
 
 void GNSS_srv(){
@@ -41,40 +48,31 @@ void GNSS_srv(){
 }
 
 float GNSS_calcDistance(float targetLat, float targetLon){
-    if(myFix == 0)
+   if(myFix == 0)
         return -1.0f;
-
-    float rlat1 = 3.14f * myLat / 180.0f;
-    float rlat2 = 3.14f * targetLat / 180.0f;
-    float theta = myLon - targetLon;
-    float rtheta = 3.14f * theta / 180.0f;
-
-    float dist = sin(rlat1) * sin(rlat2) 
-                + cos(rlat1) * cos(rlat2) * cos(rtheta);
+    
+    double dist;
+    dist = sin(toRad(myLat)) * sin(toRad(targetLat)) + cos(toRad(myLat)) * cos(toRad(targetLat)) * cos(toRad(myLon - targetLon));
     dist = acos(dist);
-    dist = dist * 180.0f / 3.14f;
-    dist = dist * 60.0f * 1.1515f;
-    dist = dist * 1.609344f;
-    // myLat
-    // myLon
-    return dist;
+
+    dist = 6371.0 * dist;
+
+    return (float)dist;
 }
 
 float GNSS_calcDir(float deviceAzimuth, float targetLat, float targetLon){
-    if(myFix == 0)
+   if(myFix == 0)
         return 0.0f;
 
+    
     float dy = targetLat - myLat;
-    float dx = cosf(M_PI/180.0f*myLat) * (targetLon - myLon);
+    float dx = cosf(M_PI/180.0f * myLat) * (targetLon - myLon);
     float angle = atan2f(dy, dx);
 
-    angle = angle * 180.0f/3.14f;
+    angle = angle * 180.0f / M_PI;
     angle = angle - 90.0f;
     angle = angle + deviceAzimuth;
-
-    if(angle > 180.0f)
-        angle = angle - 360.0f;
-
+    
     return angle;
 }
 

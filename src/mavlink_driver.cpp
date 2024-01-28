@@ -1,4 +1,3 @@
-
 //#include "TeleMetry.h"
 #include "BluetoothSerial.h"
 #include "standard/mavlink.h"
@@ -32,7 +31,7 @@ static uint8_t system_state = MAV_STATE_ACTIVE;        ///< System ready for fli
 
 void MAVLink_init(){
     SerialBT.register_callback(BT_callback);
-    SerialBT.begin("ESP32test"); //Bluetooth device name
+    SerialBT.begin("TTGO"); //Bluetooth device name
 }
 
 void MAVLink_srv(){
@@ -113,8 +112,10 @@ void MAVLink_srv(){
         mavlink_msg_gps_global_origin_pack(sysid, 0, &msg,
                                500100000, 200015000, 0, 0);
         len = mavlink_msg_to_send_buffer(buf, &msg);
-        if(BTconnected)
+        if(BTconnected){
             SerialBT.write(buf, len);
+            Serial.println("Sent");
+        }
 
         //TODO:
         //https://github.com/mavlink/c_library_v2/tree/master/common

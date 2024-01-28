@@ -5,6 +5,7 @@
 #include "SPIFFS.h"
 #include "FileSys.h"
 #include "TeleMetry.h"
+#include "preferences.h"
 
 static lora_bin_packet_t 		lora_bin_packet_d;
 static lora_binmin_packet_t 	lora_binmin_packet_d;
@@ -18,6 +19,14 @@ float distance2target = 0.0f;
 float dir2target = 0.0f;
 
 float TM_RSSI = -200.0f;
+
+int TM_ID = 1; //Target ID
+
+float verticalVel = 0.0f;
+
+static long LORA_lastPacketMillis = 0;
+uint32_t prevTimestamp = 1;
+float prevAltitude = 0.0f;
 
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 	//if(!TM_frameCheck(buf, len))
@@ -35,6 +44,9 @@ void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 	if((len == sizeof(lora_bin_packet_t)) && ((*(uint16_t *)buf) == 0x00AA))		//Telemetry frame - full state
 		TM_parser_FULLSTATE(buf);
 
+	if((len == sizeof(lora_bin_packet_t)) && ((*(uint16_t *)buf) == 0x00AB))		//Telemetry frame - full state retransmitted
+		TM_parser_FULLSTATE(buf);
+
 	if((len == sizeof(lora_binmin_packet_t)) && ((*buf) == 0x11))		//Telemetry frame - minimal state
 		TM_parser_MINISTATE(buf);
 
@@ -47,6 +59,14 @@ void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 
 void TM_parser_FULLSTATE(uint8_t * buf){
 	//Serial.println(F("Full Telemetry!"));
+	if((((lora_bin_packet_t *)buf)->id) != TM_ID) {
+		return;
+	}
+
+	
+
+	LORA_lastPacketMillis = millis();
+
 	rocket_state_d.timestamp_ms = ((lora_bin_packet_t *)buf)->timestamp_ms;
 	rocket_state_d.packet_no = ((lora_bin_packet_t *)buf)->packet_no;
 	rocket_state_d.state = ((lora_bin_packet_t *)buf)->state;
@@ -68,19 +88,27 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 	rocket_state_d.gnss_altitude = ((float)((lora_bin_packet_t *)buf)->alti_gps)  / 1000.0f;
 	rocket_state_d.fix = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) >> 6;
 	rocket_state_d.sats = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) & 0x3F;
+	rocket_state_d.vbat = ((float)((lora_bin_packet_t *)buf)->vbat_10) / 10.0f;
 
 	if(rocket_state_d.fix > 0){
+		
 		lastvalid_lat.sign = rocket_state_d.gnss_lat.sign;
 		lastvalid_lat.cord = rocket_state_d.gnss_lat.cord;
 		lastvalid_lon.sign = rocket_state_d.gnss_lon.sign;
 		lastvalid_lon.cord = rocket_state_d.gnss_lon.cord;
+		lastvalid_altitude = rocket_state_d.gnss_altitude;
+
+		verticalVel = (prevAltitude - lastvalid_altitude) / (float(millis()/1000) - float(prevTimestamp/1000));
+		Serial.println(verticalVel);
+		prevTimestamp = millis();
+		prevAltitude = lastvalid_altitude;
 	}
 
 	distance2target = GNSS_calcDistance(lastvalid_lat.cord, lastvalid_lon.cord);
 	dir2target		= GNSS_calcDir(0.0f, lastvalid_lat.cord, lastvalid_lon.cord);
 
-	char bufer[256];
-	sprintf(bufer, "%i,%i,0x%x,"
+	char buffer[256];
+	sprintf(buffer, "%i,%i,0x%x,"
 					"%.2f,%.2f,%.2f,"
 					"%.2f,%.2f,%.2f,"
 					"%.2f,"
@@ -98,7 +126,7 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 								rocket_state_d.gnss_altitude, rocket_state_d.fix, rocket_state_d.sats,
 								GNSS_getOwnLat(), GNSS_getOwnLon(), GNSS_getOwnFix(), GNSS_getOwnFix(),
 								distance2target, dir2target);
-	Serial.println(bufer);
+	Serial.println(buffer);
 
 
 	TM_file_write();
@@ -176,6 +204,10 @@ float TM_getDir2target(){
 	return dir2target;
 }
 
+float TM_getVbat(){
+	return rocket_state_d.vbat;
+}
+
 void TM_file_write(){
 	char s[1000];
 	sprintf(s, "%ld,%d,%i,%i,"	//sys state
@@ -207,4 +239,25 @@ void TM_file_write(){
 	GNSS_getOwnFix(), GNSS_getOwnSat(),
 	distance2target, dir2target);
 	appendFile(SPIFFS, "/log.csv", s);
+}
+
+bool TM_changeID(int id) {
+	Serial.printf("Changing ID to %d \n", id);
+	TM_ID = id;
+	
+	preferences_update_id(id);
+	
+	return true;
+}
+
+int TM_getID() {
+	return TM_ID;
+}
+
+long LORA_getPacketHealth(){
+    return LORA_lastPacketMillis;
+}
+
+float TM_getVertVel(){
+	return verticalVel;
 }
