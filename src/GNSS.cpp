@@ -5,8 +5,6 @@
 #include "GNSS.h"
 
 
-#define pi 3.14159265358979323846
-
 //------ GNSS -------------
 SFE_UBLOX_GNSS myGNSS;
 char nmeaBuffer[100];
@@ -30,7 +28,7 @@ bool GNSS_init(){
 }
 
 double toRad(double degree) {
-    return degree/180 * pi;
+    return degree/180 * M_PI;
 }
 
 void GNSS_srv(){
@@ -53,44 +51,13 @@ float GNSS_calcDistance(float targetLat, float targetLon){
    if(myFix == 0)
         return -1.0f;
     
-    /*
-    float rlat1 = 3.141592f * myLat / 180.0f;
-    float rlat2 = 3.141592f * targetLat / 180.0f;
-    float theta = myLon - targetLon;
-    float rtheta = 3.141592f * theta / 180.0f;
-
-    float dist = sin(rlat1) * sin(rlat2) 
-                + cos(rlat1) * cos(rlat2) * cos(rtheta);
-    dist = acos(dist);
-    dist = dist * 180.0f / 3.14f;
-    dist = dist * 60.0f * 1.1515f;
-    dist = dist * 1.609344f;
-    // myLat
-    // myLon
-    */
-
-
-   /*
-    //http://www.movable-type.co.uk/scripts/latlong.html
-
-    float R = 6371000.0f;
-    float rlat1 = 3.141592f * myLat / 180.0f;
-    float rlat2 = 3.141592f * targetLat / 180.0f;
-    float dlat = 3.141592f * (targetLat - myLat) / 180.0f;
-    float dlon = 3.141592f * (targetLon - myLon) / 180.0f;
-
-    float a = sin(dlat/2.0f) * sin(dlat/2.0f) + cos(rlat1) * cos(rlat2) * sin(dlon/2)* sin(dlon/2);
-    float c = 2 * atan2f(sqrt(a), sqrt(1.0f - a));
-    float dist = R * c;
-    */
-
     double dist;
     dist = sin(toRad(myLat)) * sin(toRad(targetLat)) + cos(toRad(myLat)) * cos(toRad(targetLat)) * cos(toRad(myLon - targetLon));
     dist = acos(dist);
 
     dist = 6371.0 * dist;
 
-    return dist;
+    return (float)dist;
 }
 
 float GNSS_calcDir(float deviceAzimuth, float targetLat, float targetLon){
@@ -99,20 +66,13 @@ float GNSS_calcDir(float deviceAzimuth, float targetLat, float targetLon){
 
     
     float dy = targetLat - myLat;
-    float dx = cosf(M_PI/180.0f*myLat) * (targetLon - myLon);
+    float dx = cosf(M_PI/180.0f * myLat) * (targetLon - myLon);
     float angle = atan2f(dy, dx);
 
-    angle = angle * 180.0f/3.14f;
+    angle = angle * 180.0f / M_PI;
     angle = angle - 90.0f;
     angle = angle + deviceAzimuth;
     
-
-
-    /*
-    if(angle > 180.0f)
-        angle = angle - 360.0f;
-    */
-   
     return angle;
 }
 

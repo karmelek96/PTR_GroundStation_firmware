@@ -13,7 +13,6 @@
 #include "SF_RSL.h"
 #include "FileSys.h"
 #include "preferences.h"
-#include "mavlink_driver.h"
 
 static long RSL_previousMillis = 0;
 
@@ -46,9 +45,6 @@ void setup() {
 
   LORA_changeFrequency(preferences_get_frequency());
   TM_changeID(preferences_get_id());
-
-  MAVLink_init();
-
   
 
   //Server stuff
@@ -115,6 +111,5 @@ void loop() {
   GNSS_srv();
 
   OLED_refresh();
-  
-  MAVLink_srv();
+
 }

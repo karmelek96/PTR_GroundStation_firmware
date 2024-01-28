@@ -34,7 +34,7 @@ static uint16_t packetCounter[5] = {0,0,0,0,0};
 static float packet_rate = 0;
 static uint8_t LORA_newPacketReceivedOLED = 0;
 
-float LORA_currentFrequencyMHz = 434.25;
+float LORA_currentFrequencyMHz = 434.25f;
 
 
 
@@ -51,7 +51,7 @@ bool LORA_init(){
         while (true);
     }
 
-    radio.setFrequency(433);
+    radio.setFrequency(433.0f);
     radio.setBandwidth(125);        // 7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500
     radio.setSpreadingFactor(8);   // 6 - 12
     radio.setCodingRate(5);
