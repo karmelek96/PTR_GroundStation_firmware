@@ -1,6 +1,6 @@
 #pragma once
 
-void OLED_init();
+bool OLED_init();
 void OLED_refresh();
 
 void OLED_drawRocketLaunch();

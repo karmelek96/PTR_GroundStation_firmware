@@ -19,12 +19,10 @@ static long OLED_interval = 100;
 
 static long OLED_newPacketCounter = 0;
 
-void OLED_init(){
-    //pinMode(16,OUTPUT);
-    //digitalWrite(16, LOW);    // set GPIO16 low to reset OLED
-    //delay(50); 
-    //digitalWrite(16, HIGH); // while OLED is running, must set GPIO16 in high、
-    display.init();
+bool OLED_init(){
+
+    bool ret = false;
+    ret = display.init();
     display.flipScreenVertically();  
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
@@ -32,6 +30,8 @@ void OLED_init(){
     display.drawXbm(0, 0, 128, 64, splash);
     display.display();
     Serial.println(F("SSD1306 ready!"));
+    
+    return ret;
 }
 
 void OLED_refresh(){

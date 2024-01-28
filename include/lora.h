@@ -1,6 +1,6 @@
 #pragma once
 
-void LORA_init();
+bool LORA_init();
 void LORA_startRX();
 void LORA_setFlag();
 void LORA_RXhandler();

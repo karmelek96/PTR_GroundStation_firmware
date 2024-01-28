@@ -5,6 +5,7 @@
 #include "SPIFFS.h"
 #include "FileSys.h"
 #include "TeleMetry.h"
+#include "preferences.h"
 
 static lora_bin_packet_t 		lora_bin_packet_d;
 static lora_binmin_packet_t 	lora_binmin_packet_d;
@@ -243,6 +244,9 @@ void TM_file_write(){
 bool TM_changeID(int id) {
 	Serial.printf("Changing ID to %d \n", id);
 	TM_ID = id;
+	
+	preferences_update_id(id);
+	
 	return true;
 }
 

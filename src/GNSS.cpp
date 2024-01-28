@@ -18,13 +18,15 @@ float myLon    = 0.0f;
 uint8_t myFix  = 0;
 uint8_t mySats = 0;
 
-void GNSS_init(){
+bool GNSS_init(){
     Serial1.begin(9600, SERIAL_8N1, 34, 12);
 
     if (myGNSS.begin(Serial1) == false) {
         Serial.println(F("Ublox init Failed. Freezing."));
         //while (1);
+        return false;
     }
+    return true;
 }
 
 double toRad(double degree) {

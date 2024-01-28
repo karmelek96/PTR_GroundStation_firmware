@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <RadioLib.h>
 #include "FileSys.h"
+#include "preferences.h"
 
 //---------------- LORA declarations -------------------------
 #define RADIO_SCLK_PIN              5
@@ -39,7 +40,7 @@ float LORA_currentFrequencyMHz = 434.25;
 
 
 
-void LORA_init(){
+bool LORA_init(){
     Serial.print(F("[SX1278] Initializing ... "));
     int state = radio.begin();
     if (state == RADIOLIB_ERR_NONE) {
@@ -50,7 +51,7 @@ void LORA_init(){
         while (true);
     }
 
-    radio.setFrequency(434.25);
+    radio.setFrequency(433);
     radio.setBandwidth(125);        // 7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500
     radio.setSpreadingFactor(8);   // 6 - 12
     radio.setCodingRate(5);
@@ -63,6 +64,7 @@ void LORA_init(){
     Serial.print(F("[SX1276] Starting to listen ... "));
 
     TM_file_write();
+    return true;
 }
 
 void LORA_startRX(){
@@ -160,7 +162,9 @@ bool LORA_changeFrequency(int freq){
     double temp = (double)freq / 1000.0;
 
     Serial.printf("Changing frequency to %f \n", (float)temp);
-    
+
+    preferences_update_frequency(freq);
+
     if(radio.setFrequency((float)temp) != 0){
         return false;
     }
