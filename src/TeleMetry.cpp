@@ -6,9 +6,11 @@
 #include "FileSys.h"
 #include "TeleMetry.h"
 #include "preferences.h"
+#include "SQL.h"
 
-static lora_bin_packet_t 		lora_bin_packet_d;
-static lora_binmin_packet_t 	lora_binmin_packet_d;
+void TM_parser_FULLSTATE(uint8_t * buf);
+void TM_parser_TRACKER(uint8_t * buf);
+void TM_file_write(char * line, uint16_t length);
 
 static rocket_state_t rocket_state_d;
 geocord_t lastvalid_lat = {0.0f, 'N'};
@@ -29,66 +31,57 @@ uint32_t prevTimestamp = 1;
 float prevAltitude = 0.0f;
 
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
-	//if(!TM_frameCheck(buf, len))
-	//		return;
-	// Serial.print(F("New packet!  "));
-	// Serial.print("Lenght: ");
-	// Serial.print(len);
-	// Serial.print("  ID: ");
-	// uint16_t ID = (*(uint16_t *)buf);
-	// Serial.println(ID);
-
-	
-
 	TM_RSSI = RSSI;
-	if((len == sizeof(lora_bin_packet_t)) && ((*(uint16_t *)buf) == 0x00AA))		//Telemetry frame - full state
+	
+	//Telemetry frame - full state
+	if((*((uint8_t *)buf + 0)) == PACKET_LEGACY_FULL)		
 		TM_parser_FULLSTATE(buf);
 
-	if((len == sizeof(lora_bin_packet_t)) && ((*(uint16_t *)buf) == 0x00AB))		//Telemetry frame - full state retransmitted
-		TM_parser_FULLSTATE(buf);
-
-	if((len == sizeof(lora_binmin_packet_t)) && ((*buf) == 0x11))		//Telemetry frame - minimal state
-		TM_parser_MINISTATE(buf);
-
-	//else if((len == 6) && ((*buf) == 0x21))	//Command frame - manual control
-	//	TM_parser_CMDMC(buf);
-
-	//else if((len == 6) && ((*buf) == 0x31))	//Config frame
-	//	TM_parser_CFG(buf);
+	//Tracker frame - full state retransmitted
+	if((*((uint8_t *)buf + 0)) == PACKET_TRACKER)	
+		TM_parser_TRACKER(buf);
 }
 
 void TM_parser_FULLSTATE(uint8_t * buf){
 	//Serial.println(F("Full Telemetry!"));
-	if((((lora_bin_packet_t *)buf)->id) != TM_ID) {
+
+	kppacket_legacyheader_t * pHeader;
+	kppacket_payload_legacyfull_t * pPlayload;
+
+	pHeader = (kppacket_legacyheader_t*)buf;
+	pPlayload = (kppacket_payload_legacyfull_t*)(buf + sizeof(kppacket_legacyheader_t));
+
+	// Check if packet is destined to this device
+	if((pHeader->sender_id != TM_ID) && (TM_ID != 0)) {
 		return;
 	}
 
-	
-
 	LORA_lastPacketMillis = millis();
 
-	rocket_state_d.timestamp_ms = ((lora_bin_packet_t *)buf)->timestamp_ms;
-	rocket_state_d.packet_no = ((lora_bin_packet_t *)buf)->packet_no;
-	rocket_state_d.state = ((lora_bin_packet_t *)buf)->state;
-	rocket_state_d.flags = ((lora_bin_packet_t *)buf)->flags;
-	rocket_state_d.accX  = ((float)((lora_bin_packet_t *)buf)->accX_100) / 100.0f;
-	rocket_state_d.accY  = ((float)((lora_bin_packet_t *)buf)->accY_100) / 100.0f;
-	rocket_state_d.accZ  = ((float)((lora_bin_packet_t *)buf)->accZ_100) / 100.0f;
-	rocket_state_d.gyroX = ((float)((lora_bin_packet_t *)buf)->gyroX_10) / 10.0f;
-	rocket_state_d.gyroY = ((float)((lora_bin_packet_t *)buf)->gyroY_10) / 10.0f;
-	rocket_state_d.gyroZ = ((float)((lora_bin_packet_t *)buf)->gyroZ_10) / 10.0f;
-	rocket_state_d.tilt  = ((float)((lora_bin_packet_t *)buf)->tilt_100) / 100.0f;
-	rocket_state_d.pressure = ((lora_bin_packet_t *)buf)->pressure;
-	rocket_state_d.velocity = ((float)((lora_bin_packet_t *)buf)->velocity_10)  / 10.0f;
-	rocket_state_d.altitude = ((float)((lora_bin_packet_t *)buf)->altitude);
-	rocket_state_d.gnss_lat.cord = ((double)((((lora_bin_packet_t *)buf)->lat)))  / 10000000.0;
-	rocket_state_d.gnss_lat.sign = (((lora_bin_packet_t *)buf)->lat < 0)?'S':'N';
-	rocket_state_d.gnss_lon.cord = ((double)((((lora_bin_packet_t *)buf)->lon)))  / 10000000.0;
-	rocket_state_d.gnss_lon.sign = (((lora_bin_packet_t *)buf)->lon < 0)?'W':'E';
-	rocket_state_d.gnss_altitude = ((float)((lora_bin_packet_t *)buf)->alti_gps)  / 1000.0f;
-	rocket_state_d.fix = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) >> 6;
-	rocket_state_d.sats = ((uint8_t)((lora_bin_packet_t *)buf)->sats_fix) & 0x3F;
-	rocket_state_d.vbat = ((float)((lora_bin_packet_t *)buf)->vbat_10) / 10.0f;
+	rocket_state_d.timestamp_ms = pHeader->timestamp_ms;
+	rocket_state_d.packet_no = pHeader->packet_no;
+	rocket_state_d.sender_ID = pHeader->sender_id;
+	rocket_state_d.dest_ID = 0;
+	rocket_state_d.state = pPlayload->state;
+	rocket_state_d.flags = pPlayload->flags;
+	rocket_state_d.accX  = pPlayload->accX_100 / 100.0f;
+	rocket_state_d.accY  = ((float)pPlayload->accY_100) / 100.0f;
+	rocket_state_d.accZ  = ((float)pPlayload->accZ_100) / 100.0f;
+	rocket_state_d.gyroX = ((float)pPlayload->gyroX_10) / 10.0f;
+	rocket_state_d.gyroY = ((float)pPlayload->gyroY_10) / 10.0f;
+	rocket_state_d.gyroZ = ((float)pPlayload->gyroZ_10) / 10.0f;
+	rocket_state_d.tilt  = ((float)pPlayload->tilt_100) / 100.0f;
+	rocket_state_d.pressure = pPlayload->pressure;
+	rocket_state_d.velocity = ((float)pPlayload->velocity_10)  / 10.0f;
+	rocket_state_d.altitude = ((float)pPlayload->altitude);
+	rocket_state_d.gnss_lat.cord = ((double)((pPlayload->lat)))  / 10000000.0;
+	rocket_state_d.gnss_lat.sign = (pPlayload->lat < 0)?'S':'N';
+	rocket_state_d.gnss_lon.cord = ((double)((pPlayload->lon)))  / 10000000.0;
+	rocket_state_d.gnss_lon.sign = (pPlayload->lon < 0)?'W':'E';
+	rocket_state_d.gnss_altitude = ((float)pPlayload->alti_gps)  / 1000.0f;
+	rocket_state_d.fix = ((uint8_t)pPlayload->sats_fix) >> 6;
+	rocket_state_d.sats = ((uint8_t)pPlayload->sats_fix) & 0x3F;
+	rocket_state_d.vbat = ((float)pPlayload->vbat_10) / 10.0f;
 
 	if(rocket_state_d.fix > 0){
 		
@@ -107,35 +100,155 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 	distance2target = GNSS_calcDistance(lastvalid_lat.cord, lastvalid_lon.cord);
 	dir2target		= GNSS_calcDir(0.0f, lastvalid_lat.cord, lastvalid_lon.cord);
 
-	char buffer[256];
-	sprintf(buffer, "%i,%i,0x%x,"
-					"%.2f,%.2f,%.2f,"
-					"%.2f,%.2f,%.2f,"
-					"%.2f,"
-					"%.0f,%.0f,%0.1f,"
-					"%lf,%lf,"
-					"%.1f,%i,%i"
-					"%lf,%lf,%i,%i,"
-					"%.3f,%.0f", 	
-								rocket_state_d.timestamp_ms, rocket_state_d.state, rocket_state_d.flags,
-								rocket_state_d.accX, rocket_state_d.accY, rocket_state_d.accZ,
-								rocket_state_d.gyroX, rocket_state_d.gyroY, rocket_state_d.gyroZ,
-								rocket_state_d.tilt,
-								rocket_state_d.pressure, rocket_state_d.altitude, rocket_state_d.velocity,
-								rocket_state_d.gnss_lat.cord, rocket_state_d.gnss_lon.cord,
-								rocket_state_d.gnss_altitude, rocket_state_d.fix, rocket_state_d.sats,
-								GNSS_getOwnLat(), GNSS_getOwnLon(), GNSS_getOwnFix(), GNSS_getOwnFix(),
-								distance2target, dir2target);
+	char buffer[512] = {0};
+	uint16_t len = sprintf(buffer, "0x%X,%.1f,%ld,%d,%i,%i,%i,"	//sys state
+				"%f,%f,%f,"		//acc
+				"%f,%f,%f,"		//gyro
+				"%f,"			//tilt
+				"%f,%f,%f,"	//press, velo, alti
+				"%c,%f,%c,%f,%d,%d,"//geo
+				"%f,%f,%d,%d,"		//own geo
+				"%f,%f\n", 			//distance, dir
+	PACKET_LEGACY_FULL,
+	TM_RSSI,
+	rocket_state_d.timestamp_ms, 
+	rocket_state_d.packet_no, 
+	rocket_state_d.sender_ID,
+	rocket_state_d.state, 
+	rocket_state_d.flags, 
+	rocket_state_d.accX, 
+	rocket_state_d.accY, 
+	rocket_state_d.accZ,  
+	rocket_state_d.gyroX,
+	rocket_state_d.gyroY,
+	rocket_state_d.gyroZ,
+	rocket_state_d.tilt, 
+	rocket_state_d.pressure, 
+	rocket_state_d.velocity, 
+	rocket_state_d.altitude,
+	rocket_state_d.gnss_lat.sign, rocket_state_d.gnss_lat.cord,  
+	rocket_state_d.gnss_lon.sign, rocket_state_d.gnss_lon.cord, 
+	rocket_state_d.gnss_altitude, 
+	rocket_state_d.fix, rocket_state_d.sats,
+	GNSS_getOwnLat(), GNSS_getOwnLon(),
+	GNSS_getOwnFix(), GNSS_getOwnSat(),
+	distance2target, dir2target);
+	
 	Serial.println(buffer);
+	TM_file_write(buffer, len);
 
+	// SQL
+	packet_generic_t packet_generic_d = {
+		.sender_id = pHeader->sender_id,
+		.packet_no = pHeader->packet_no,
+		.vbat = ((float)pPlayload->vbat_10) / 10.0f,
+		.sats_fix = (uint8_t)pPlayload->sats_fix,
+		.latitude = ((float)((pPlayload->lat)))  / 10000000.0f,
+		.longitude = ((float)((pPlayload->lon)))  / 10000000.0f,
+		.altitude = (float)pPlayload->alti_gps / 1000.0f,
+		.max_altitude = 0.0f,
+		.packet_length = sizeof(kppacket_payload_legacyfull_t) + sizeof(kppacket_legacyheader_t)
+	};
 
-	TM_file_write();
+	memcpy(packet_generic_d.raw, pHeader, packet_generic_d.packet_length);
+	SQL_addToBuffer(&packet_generic_d);
 }
 
-void TM_parser_MINISTATE(uint8_t * buf){
-	//Serial.println(F("Mini Telemetry!"));
-	//((lora_binmin_packet_t *)buf)->id;
-	//((lora_binmin_packet_t *)buf)->vbat_10;
+void TM_parser_TRACKER(uint8_t * buf){
+	//Serial.println(F("Full Telemetry!"));
+
+	kppacket_header_t * pHeader;
+	kppacket_payload_rocket_tracker_t * pPlayload;
+
+	pHeader = (kppacket_header_t*)buf;
+	pPlayload = (kppacket_payload_rocket_tracker_t*)(buf + sizeof(kppacket_header_t));
+
+	// Check if packet is destined to this device
+	if((pHeader->dest_id != TM_ID) && (TM_ID != 0)) {
+		return;
+	}
+
+	LORA_lastPacketMillis = millis();
+
+	rocket_state_d.timestamp_ms = pHeader->timestamp_ms;
+	rocket_state_d.packet_no = pHeader->packet_no;
+	rocket_state_d.sender_ID = pHeader->sender_id;
+	rocket_state_d.dest_ID = 0;
+	rocket_state_d.state = 0;
+	rocket_state_d.flags = 0;
+	rocket_state_d.accX  = 0.0f;
+	rocket_state_d.accY  = 0.0f;
+	rocket_state_d.accZ  = 0.0f;
+	rocket_state_d.gyroX = 0.0f;
+	rocket_state_d.gyroY = 0.0f;
+	rocket_state_d.gyroZ = 0.0f;
+	rocket_state_d.tilt  = 0.0f;
+	rocket_state_d.pressure = 0.0f;
+	rocket_state_d.velocity = 0.0f;
+	rocket_state_d.altitude = 0.0f;
+	rocket_state_d.gnss_lat.cord = ((double)((pPlayload->lat)))  / 10000000.0;
+	rocket_state_d.gnss_lat.sign = (pPlayload->lat < 0)?'S':'N';
+	rocket_state_d.gnss_lon.cord = ((double)((pPlayload->lon)))  / 10000000.0;
+	rocket_state_d.gnss_lon.sign = (pPlayload->lon < 0)?'W':'E';
+	rocket_state_d.gnss_altitude = (float)pPlayload->alti_gps;
+	rocket_state_d.fix = ((uint8_t)pPlayload->sats_fix) >> 6;
+	rocket_state_d.sats = ((uint8_t)pPlayload->sats_fix) & 0x3F;
+	rocket_state_d.vbat = ((float)pPlayload->vbat_10) / 10.0f;
+
+	if(rocket_state_d.fix > 0){
+		
+		lastvalid_lat.sign = rocket_state_d.gnss_lat.sign;
+		lastvalid_lat.cord = rocket_state_d.gnss_lat.cord;
+		lastvalid_lon.sign = rocket_state_d.gnss_lon.sign;
+		lastvalid_lon.cord = rocket_state_d.gnss_lon.cord;
+		lastvalid_altitude = rocket_state_d.gnss_altitude;
+
+		verticalVel = (prevAltitude - lastvalid_altitude) / (float(millis()/1000) - float(prevTimestamp/1000));
+		Serial.println(verticalVel);
+		prevTimestamp = millis();
+		prevAltitude = lastvalid_altitude;
+	}
+
+	distance2target = GNSS_calcDistance(lastvalid_lat.cord, lastvalid_lon.cord);
+	dir2target		= GNSS_calcDir(0.0f, lastvalid_lat.cord, lastvalid_lon.cord);
+
+	char buffer[512] = {0};
+	uint16_t len = sprintf(buffer, "0x%X,%.1f,%ld,%d,%i,"	//Packet ID, timestamp, packet no, sender ID
+									"%c,%f,%c,%f,%f,"	//geo + alt
+									"%d,%d,"			//fix, sats
+									"%f,%f,%d,%d,"		//own geo
+									"%f,%f\n", 			//distance, dir
+	PACKET_TRACKER,
+	TM_RSSI,
+	rocket_state_d.timestamp_ms, 
+	rocket_state_d.packet_no, 
+	rocket_state_d.sender_ID,
+	rocket_state_d.gnss_lat.sign, rocket_state_d.gnss_lat.cord, 
+	rocket_state_d.gnss_lon.sign, rocket_state_d.gnss_lon.cord,  
+	rocket_state_d.gnss_altitude, 
+	rocket_state_d.fix, rocket_state_d.sats,
+	GNSS_getOwnLat(), GNSS_getOwnLon(),
+	GNSS_getOwnFix(), GNSS_getOwnSat(),
+	distance2target, dir2target);
+
+	Serial.println(buffer);
+	TM_file_write(buffer, len);
+
+	// SQL
+	packet_generic_t packet_generic_d = {
+		.sender_id = pHeader->sender_id,
+		.packet_no = pHeader->packet_no,
+		.vbat = ((float)pPlayload->vbat_10) / 10.0f,
+		.sats_fix = (uint8_t)pPlayload->sats_fix,
+		.latitude = ((float)((pPlayload->lat)))  / 10000000.0f,
+		.longitude = ((float)((pPlayload->lon)))  / 10000000.0f,
+		.altitude = (float)pPlayload->alti_gps,
+		.max_altitude = 0.0f,
+		.packet_length = sizeof(kppacket_payload_rocket_tracker_t) + sizeof(kppacket_header_t)
+	};
+
+	memcpy(packet_generic_d.raw, pHeader, packet_generic_d.packet_length);
+	SQL_addToBuffer(&packet_generic_d);
 }
 
 uint8_t TM_getRSSIPercentage(){
@@ -208,37 +321,10 @@ float TM_getVbat(){
 	return rocket_state_d.vbat;
 }
 
-void TM_file_write(){
-	char s[1000];
-	sprintf(s, "%ld,%d,%i,%i,"	//sys state
-				"%f,%f,%f,"		//acc
-				"%f,%f,%f,"		//gyro
-				"%f,%f,%f,%f,%f,"	//tilt, press, velo, alti
-				"%c,%f,%c,%f,%d,%d,"//geo
-				"%f,%f,%d,%d,"		//own geo
-				"%f,%f\n", 			//distance, dir
-	rocket_state_d.timestamp_ms, 
-	rocket_state_d.packet_no, 
-	rocket_state_d.state, 
-	rocket_state_d.flags, 
-	rocket_state_d.accX, 
-	rocket_state_d.accY, 
-	rocket_state_d.accZ,  
-	rocket_state_d.gyroX,
-	rocket_state_d.gyroY,
-	rocket_state_d.gyroZ,
-	rocket_state_d.tilt, 
-	rocket_state_d.pressure, 
-	rocket_state_d.velocity, 
-	rocket_state_d.altitude,
-	rocket_state_d.gnss_lat.cord, rocket_state_d.gnss_lat.sign, 
-	rocket_state_d.gnss_lon.cord, rocket_state_d.gnss_lon.sign, 
-	rocket_state_d.gnss_altitude, 
-	rocket_state_d.fix, rocket_state_d.sats,
-	GNSS_getOwnLat(), GNSS_getOwnLon(),
-	GNSS_getOwnFix(), GNSS_getOwnSat(),
-	distance2target, dir2target);
-	appendFile(SPIFFS, "/log.csv", s);
+void TM_file_write(char * line, uint16_t length){
+	if(*(line+length) == 0){
+		appendFile(SPIFFS, "/log.csv", line);
+	}
 }
 
 bool TM_changeID(int id) {

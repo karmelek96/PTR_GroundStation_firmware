@@ -63,7 +63,6 @@ bool LORA_init(){
     radio.setDio0Action(LORA_setFlag);
     Serial.print(F("[SX1276] Starting to listen ... "));
 
-    TM_file_write();
     return true;
 }
 
@@ -95,7 +94,7 @@ void LORA_RXhandler(){
         enableInterrupt = false;
 
         //reset counter
-        lora_timeout_counter = 20;
+        lora_timeout_counter = 50;
 
         // reset flag
         receivedFlag = false;

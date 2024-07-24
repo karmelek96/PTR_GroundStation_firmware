@@ -8,6 +8,8 @@ typedef struct {
 typedef struct {
     uint32_t timestamp_ms;
     uint16_t packet_no;
+    uint16_t dest_ID;
+    uint16_t sender_ID;
     uint8_t  state;
     uint8_t  flags;
 
@@ -34,8 +36,6 @@ typedef struct {
 } rocket_state_t;
 
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI);
-void TM_parser_FULLSTATE(uint8_t * buf);
-void TM_parser_MINISTATE(uint8_t * buf);
 
 uint8_t TM_getRSSIPercentage();
 uint8_t TM_getFlightState();
@@ -48,7 +48,7 @@ float TM_getMach();
 float TM_getDistance2target();
 float TM_getDir2target();
 float TM_getVbat();
-void  TM_file_write();
+
 bool TM_changeID(int id);
 int TM_getID();
 long LORA_getPacketHealth();
