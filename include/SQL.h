@@ -1,6 +1,9 @@
 #pragma once
 
 typedef struct {
+    uint32_t receiver_id;
+    float rssi;
+    uint64_t timestamp;
     uint16_t sender_id;
     uint16_t packet_no;
     float vbat;

@@ -8,8 +8,8 @@
 #include "preferences.h"
 #include "SQL.h"
 
-void TM_parser_FULLSTATE(uint8_t * buf);
-void TM_parser_TRACKER(uint8_t * buf);
+void TM_parser_FULLSTATE(float rssi, uint8_t * buf);
+void TM_parser_TRACKER(float rssi, uint8_t * buf);
 void TM_file_write(char * line, uint16_t length);
 
 static rocket_state_t rocket_state_d;
@@ -35,14 +35,14 @@ void TM_parser(uint8_t * buf, uint8_t len, float RSSI){
 	
 	//Telemetry frame - full state
 	if((*((uint8_t *)buf + 0)) == PACKET_LEGACY_FULL)		
-		TM_parser_FULLSTATE(buf);
+		TM_parser_FULLSTATE(RSSI, buf);
 
 	//Tracker frame - full state retransmitted
 	if((*((uint8_t *)buf + 0)) == PACKET_TRACKER)	
-		TM_parser_TRACKER(buf);
+		TM_parser_TRACKER(RSSI, buf);
 }
 
-void TM_parser_FULLSTATE(uint8_t * buf){
+void TM_parser_FULLSTATE(float rssi, uint8_t * buf){
 	//Serial.println(F("Full Telemetry!"));
 
 	kppacket_legacyheader_t * pHeader;
@@ -110,7 +110,7 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 				"%f,%f,%d,%d,"		//own geo
 				"%f,%f\n", 			//distance, dir
 	PACKET_LEGACY_FULL,
-	TM_RSSI,
+	rssi,
 	rocket_state_d.timestamp_ms, 
 	rocket_state_d.packet_no, 
 	rocket_state_d.sender_ID,
@@ -139,6 +139,9 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 
 	// SQL
 	packet_generic_t packet_generic_d = {
+		.receiver_id = 0,
+		.rssi = rssi,
+		.timestamp = 0L,	//LORA_lastPacketMillis,
 		.sender_id = pHeader->sender_id,
 		.packet_no = pHeader->packet_no,
 		.vbat = ((float)pPlayload->vbat_10) / 10.0f,
@@ -154,7 +157,7 @@ void TM_parser_FULLSTATE(uint8_t * buf){
 	SQL_addToBuffer(&packet_generic_d);
 }
 
-void TM_parser_TRACKER(uint8_t * buf){
+void TM_parser_TRACKER(float rssi, uint8_t * buf){
 	//Serial.println(F("Full Telemetry!"));
 
 	kppacket_header_t * pHeader;
@@ -219,7 +222,7 @@ void TM_parser_TRACKER(uint8_t * buf){
 									"%f,%f,%d,%d,"		//own geo
 									"%f,%f\n", 			//distance, dir
 	PACKET_TRACKER,
-	TM_RSSI,
+	rssi,
 	rocket_state_d.timestamp_ms, 
 	rocket_state_d.packet_no, 
 	rocket_state_d.sender_ID,
@@ -236,6 +239,9 @@ void TM_parser_TRACKER(uint8_t * buf){
 
 	// SQL
 	packet_generic_t packet_generic_d = {
+		.receiver_id = 0,
+		.rssi = rssi,
+		.timestamp = 0L,	//LORA_lastPacketMillis,
 		.sender_id = pHeader->sender_id,
 		.packet_no = pHeader->packet_no,
 		.vbat = ((float)pPlayload->vbat_10) / 10.0f,

@@ -163,6 +163,9 @@ void SQL_uploadToDB(packet_generic_t packet){
                             "?api_key=%s"
 							"&object_id=%i"   // S_objectID
                             "&object_type=ROCKET"
+                            "&receiverID=%li"     // TODO
+                            "&RSSI=%i"           // TODO
+                            "&timestamp=%lli"      // TODO
 							"&packet_no=%i"   // S_packetNo
 							"&latitude=%.5f" // S_latitude
 							"&longitude=%.5f" // S_longitude
@@ -171,7 +174,7 @@ void SQL_uploadToDB(packet_generic_t packet){
 							"&max_altitude=%.1f" // S_maxAltitude
                             "&vbat=%.1f"        //S_vbat
 							"&raw=%%22%s%%22",
-							api_address, api_key, packet.sender_id, packet.packet_no, packet.latitude, packet.longitude, packet.altitude,
+							api_address, api_key, packet.sender_id, packet.receiver_id, packet.rssi, packet.timestamp, packet.packet_no, packet.latitude, packet.longitude, packet.altitude,
 						    packet.sats_fix, packet.max_altitude, packet.vbat, raw_packet);
       
 	  //Serial.println(serverPath);
