@@ -18,7 +18,7 @@ static rocket_state_t rocket_state_d;
 geocord_t lastvalid_lat = {0.0f, 'N'};
 geocord_t lastvalid_lon = {0.0f, 'E'};
 float 	  lastvalid_altitude = 0.0f;
-TM_history_table_entry_t history_table[256];
+static TM_history_table_entry_t history_table[256];
 
 float distance2target = 0.0f;
 float dir2target = 0.0f;

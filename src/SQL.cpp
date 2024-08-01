@@ -25,7 +25,7 @@ void SQL_updateHistory(uint16_t sender_id);
 void SQL_uploadToDB(packet_generic_t packet);
 
 MessageBufferHandle_t xMessageBuffer_sql = NULL;
-history_table_entry_t history_table[256];
+static history_table_entry_t history_table[256];
 
 void SQL_init(){
     xMessageBuffer_sql = xMessageBufferCreate( 4096 );
