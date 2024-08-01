@@ -30,7 +30,7 @@ int preferences_init(){
         config_data_d.oled_driver = SH1106;
 
         config["configuration"]["frequency"] = 434250;
-        config["configuration"]["id"] = 21;
+        config["configuration"]["id"] = 0;
         config["configuration"]["oled_driver"] = SH1106;
 
         serializeJson(config, file);

@@ -1,7 +1,7 @@
 #pragma once
 
 typedef struct {
-    double cord;
+    float cord;
     char sign;
 } geocord_t;
 
@@ -35,6 +35,14 @@ typedef struct {
     uint8_t fix;
 } rocket_state_t;
 
+typedef struct{
+    uint16_t sender_id;
+    uint32_t last_receive_time_ms;
+    float latitude;
+    float longitude;
+    float altitude;
+} TM_history_table_entry_t;
+
 void TM_parser(uint8_t * buf, uint8_t len, float RSSI);
 
 uint8_t TM_getRSSIPercentage();
@@ -53,3 +61,4 @@ bool TM_changeID(int id);
 int TM_getID();
 long LORA_getPacketHealth();
 float TM_getVertVel();
+String TM_getJSON();

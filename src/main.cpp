@@ -26,6 +26,7 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println(F("App start!"));
+  SPIFFS.begin();
 
   if(OLED_init(preferences_get_OLEDdriver())){
     Serial.println(F("OLED init done!"));
@@ -99,15 +100,24 @@ void setup() {
   }
   
 
+  server.serveStatic("/tracker_list.html", SPIFFS, "/tracker_list.html");
+  server.serveStatic("/styles.css", SPIFFS, "/styles.css");
+  server.serveStatic("/tracker_list_script.js", SPIFFS, "/tracker_list_script.js");
+  server.serveStatic("/download", SPIFFS, "/log.csv");
+
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/index.html", "text/html", false);
   });
-  
-  server.serveStatic("/download", SPIFFS, "/log.csv");
+
+  server.on("/tracker_list_api", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", TM_getJSON());
+  });
  
   server.on("/parse", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/log.csv", "text/plain", false);
   });
+
   server.on("/help", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "KPPTR telemetry receiver:");
   });

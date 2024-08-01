@@ -149,7 +149,7 @@ void SQL_updateHistory(uint16_t sender_id){
 
 void SQL_uploadToDB(packet_generic_t packet){
     if(WiFi.status() == WL_CONNECTED){	  
-	  char raw_packet[128];
+	  char raw_packet[512];
       char serverPath[1024];
 
 	  memset(raw_packet, 0, sizeof(raw_packet));
