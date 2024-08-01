@@ -26,7 +26,7 @@ int preferences_init(){
         }
 
         config_data_d.frequency = 433250;
-        config_data_d.id = 21;
+        config_data_d.id = 0;
         config_data_d.oled_driver = SH1106;
 
         config["configuration"]["frequency"] = 434250;
