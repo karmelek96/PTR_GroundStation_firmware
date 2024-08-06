@@ -209,7 +209,7 @@ void TM_parser_TRACKER(float rssi, uint8_t * buf){
 	rocket_state_d.gnss_lat.sign = (pPlayload->lat < 0)?'S':'N';
 	rocket_state_d.gnss_lon.cord = ((float)((pPlayload->lon)))  / 10000000.0f;
 	rocket_state_d.gnss_lon.sign = (pPlayload->lon < 0)?'W':'E';
-	rocket_state_d.gnss_altitude = (float)pPlayload->alti_gps;
+	rocket_state_d.gnss_altitude = ((float)(pPlayload->alti_gps)) - 1000.0f;
 	rocket_state_d.fix = ((uint8_t)pPlayload->sats_fix) >> 6;
 	rocket_state_d.sats = ((uint8_t)pPlayload->sats_fix) & 0x3F;
 	rocket_state_d.vbat = ((float)pPlayload->vbat_10) / 10.0f;
