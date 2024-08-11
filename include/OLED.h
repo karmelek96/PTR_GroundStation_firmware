@@ -1,11 +1,14 @@
 #pragma once
 
-bool OLED_init();
+bool OLED_init(String driver);
+void OLED_changeDriver(String driver);
 void OLED_refresh();
 
 void OLED_drawRocketLaunch();
 void OLED_drawFinder();
 void OLED_drawCompass(int16_t x, int16_t y, float angle, float pitch, float yaw);
+void OLED_clear();
+void OLED_drawString(uint16_t x, uint16_t y, const String &text);
 
 const unsigned char splash [] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 

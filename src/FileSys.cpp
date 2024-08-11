@@ -7,9 +7,9 @@ bool FS_init(){
        
         return false;
     }
-    appendFile(SPIFFS, "/log.csv", "\nThis is beginning of new telemetry receiving file, this happensafter every restart of TTGO\n");
-    appendFile(SPIFFS, "/log.csv", "Timestamp,packet_no,state,flags,accX,accY,accZ,gyroX,gyroY,gyroZ,tilt,pressure,velocity,altitude,lat,lat_sign,lon,lon_sign,altitude_gnss,fix,sats,"
-                        "lat_own,lon_own,fix_own,stas_own,distance,direction\n");
+    //appendFile(SPIFFS, "/log.csv", "\nThis is beginning of new telemetry receiving file, this happensafter every restart of TTGO\n");
+    //appendFile(SPIFFS, "/log.csv", "Timestamp,packet_no,state,flags,accX,accY,accZ,gyroX,gyroY,gyroZ,tilt,pressure,velocity,altitude,lat,lat_sign,lon,lon_sign,altitude_gnss,fix,sats,"
+    //                    "lat_own,lon_own,fix_own,stas_own,distance,direction\n");
 
     return true;
 
@@ -18,33 +18,33 @@ bool FS_init(){
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Writing file: %s\r\n", path);
+    //Serial.printf("Writing file: %s", path);
 
     File file = fs.open(path, FILE_WRITE);
     if(!file){
-        Serial.println("- failed to open file for writing");
+        Serial.printf("Writing file: %s - failed to open file for writing", path);
         return;
     }
     if(file.print(message)){
-        Serial.println("- file written");
+        //Serial.println("- file written");
     } else {
-        Serial.println("- write failed");
+        Serial.printf("Writing file: %s - write failed", path);
     }
     file.close();
 }
 
 void appendFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Appending to file: %s\r\n", path);
+    //Serial.printf("Appending to file: %s", path);
 
     File file = fs.open(path, FILE_APPEND);
     if(!file){
-        Serial.println("- failed to open file for appending");
+        Serial.printf("Appending to file: %s - failed to open file for appending\r\n", path);
         return;
     }
     if(file.print(message)){
-        Serial.println("- message appended");
+        //Serial.println("- message appended");
     } else {
-        Serial.println("- append failed");
+        Serial.printf("Appending to file: %s- append failed", path);
     }
     file.close();
 }
