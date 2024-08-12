@@ -58,11 +58,12 @@ jobs:
             run:  |
                   cd ./.pio/build/ttgo-t-beam/
                   esptool.py --chip ESP32 merge_bin -o flash.bin --flash_mode dio --flash_size 4MB 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin 0x210000 spiffs.bin
+                  mv flash.bin ptr_gs_firmware_${{ github.event.inputs.releaseTag }}.bin
 
           - name: Create GitHub Release
             uses: softprops/action-gh-release@v2
             with:
-              files: ./.pio/build/ttgo-t-beam/flash.bin
+              files: ./.pio/build/ttgo-t-beam/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}.bin
               tag_name: ${{ github.event.inputs.releaseTag }}
               name: ${{ github.event.inputs.releaseTitle }}
               body: ${{ github.event.inputs.releaseDescription }}
