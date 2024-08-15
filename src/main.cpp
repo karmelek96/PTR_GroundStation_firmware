@@ -17,12 +17,14 @@
 
 static long RSL_previousMillis = 0;
 
-const char *ssid = "TTGO";
+const char *ssid_base = "PTR-GS";
 //const char *password = "KPPTR";
 
 AsyncWebServer server(80);
 
 void setup() {
+  uint8_t mac[6];
+  char ssid[12];
 
   Serial.begin(115200);
   Serial.println(F("App start!"));
@@ -54,6 +56,12 @@ void setup() {
   
   //SQL init
   SQL_init();
+
+  WiFi.macAddress(mac);
+  snprintf(ssid, sizeof(ssid), "%s-%02X%02X", ssid_base, mac[4], mac[5]);
+
+  Serial.printf("\n[*] WiFi MAC: %02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  Serial.printf("\n[*] WiFi SSID: %s\n", ssid);
 
   //Server stuff
   if(SQL_implemented()){
