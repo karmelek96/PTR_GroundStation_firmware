@@ -28,17 +28,17 @@ void setup() {
   Serial.println(F("App start!"));
   SPIFFS.begin();
 
+  if(FS_init()){
+    Serial.println(F("FS init done!"));
+  }
+
+  preferences_init();
+
   if(OLED_init(preferences_get_OLEDdriver())){
     Serial.println(F("OLED init done!"));
     OLED_clear();
     OLED_drawString(0, 5, "OLED OK");
   }
-  if(FS_init()){
-    Serial.println(F("FS init done!"));
-    OLED_drawString(0, 13, "FS OK");
-  }  
-
-  preferences_init();
 
   if(GNSS_init()){
     Serial.println(F("GNSS init done!"));
@@ -49,9 +49,6 @@ void setup() {
     OLED_drawString(0, 21, "LORA OK");
   } 
 
-  LORA_changeFrequency(preferences_get_frequency());
-  TM_changeID(preferences_get_id());
-  
   //SQL init
   SQL_init();
 
