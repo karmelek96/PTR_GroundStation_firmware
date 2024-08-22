@@ -1,6 +1,8 @@
 
 #include "FS.h"
 #include "SPIFFS.h"
+#include "lora.h"
+#include "TeleMetry.h"
 #include <string>
 #include <ArduinoJson.h>
 #include "preferences.h"
@@ -34,8 +36,7 @@ int preferences_init(){
         config["configuration"]["oled_driver"] = SH1106;
 
         serializeJson(config, file);
-        file.close(); 
-
+        file.close();
     }
     
     file = SPIFFS.open(path, FILE_READ);
@@ -50,6 +51,8 @@ int preferences_init(){
     config_data_d.id = config["configuration"]["id"];
     config_data_d.oled_driver = config["configuration"]["oled_driver"];
 
+    TM_changeID(config_data_d.id);
+    LORA_changeFrequency(config_data_d.frequency);
 
     return 0;
 }
