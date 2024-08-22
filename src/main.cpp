@@ -33,6 +33,8 @@ void setup() {
   }
 
   preferences_init();
+  TM_changeID(preferences_get_id());
+  LORA_changeFrequency(preferences_get_frequency());
 
   if(OLED_init(preferences_get_OLEDdriver())){
     Serial.println(F("OLED init done!"));
