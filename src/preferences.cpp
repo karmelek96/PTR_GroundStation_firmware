@@ -34,8 +34,7 @@ int preferences_init(){
         config["configuration"]["oled_driver"] = SH1106;
 
         serializeJson(config, file);
-        file.close(); 
-
+        file.close();
     }
     
     file = SPIFFS.open(path, FILE_READ);
@@ -49,7 +48,6 @@ int preferences_init(){
     config_data_d.frequency = config["configuration"]["frequency"];
     config_data_d.id = config["configuration"]["id"];
     config_data_d.oled_driver = config["configuration"]["oled_driver"];
-
 
     return 0;
 }
