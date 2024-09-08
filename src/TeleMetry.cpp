@@ -275,7 +275,7 @@ void TM_parser_TRACKER(float rssi, uint8_t * buf){
 		.sats_fix = (uint8_t)pPlayload->sats_fix,
 		.latitude = ((float)((pPlayload->lat)))  / 10000000.0f,
 		.longitude = ((float)((pPlayload->lon)))  / 10000000.0f,
-		.altitude = (float)pPlayload->alti_gps,
+		.altitude = ((float)pPlayload->alti_gps)  - 1000.0f,
 		.max_altitude = 0.0f,
 		.packet_length = sizeof(kppacket_payload_rocket_tracker_t) + sizeof(kppacket_header_t)
 	};
