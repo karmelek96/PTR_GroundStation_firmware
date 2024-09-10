@@ -127,11 +127,11 @@ void OLED_drawRocketLaunch(){
      display->drawStringf(0, 13, buffer,"%.2f km", TM_getGeoAltitude() / 1000.0f);
   }
   
-  display->drawStringf(0, 23, buffer, "%c%.7f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
-  display->drawStringf(0, 33, buffer, "%c%.7f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
+  display->drawStringf(0, 23, buffer, "%c%.6f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
+  display->drawStringf(0, 33, buffer, "%c%.6f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
 
   //RF freq and ID
-  display->drawStringf(0, 53, buffer, "%.3fMHz", LORA_getCurrentFrequency());
+  display->drawStringf(0, 53, buffer, "%.2fMHz", LORA_getCurrentFrequency());
   
   
   display->drawStringf(0, 43, buffer, "ID: %d", TM_getID());
