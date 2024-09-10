@@ -14,6 +14,7 @@
 #include "FileSys.h"
 #include "preferences.h"
 #include "SQL.h"
+#include "PWR.h"
 
 static long RSL_previousMillis = 0;
 
@@ -29,6 +30,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println(F("App start!"));
   SPIFFS.begin();
+
+  PWR_init(); Serial.println(F("PWR start!"));
 
   if(FS_init()){
     Serial.println(F("FS init done!"));
