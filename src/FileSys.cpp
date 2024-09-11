@@ -1,6 +1,5 @@
 #include "BOARD.h"
 #include "FileSys.h"
- 
 
 bool FS_init(){
     #ifdef SDCARD_CS
@@ -14,15 +13,14 @@ bool FS_init(){
         Serial.println("Warning: Failed to init Sd Card");
     }
 
-    #else
+    #endif
     
     if(!SPIFFS.begin(true)){
-       
         return false;
     }
 
     return true;
-    #endif
+    
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
