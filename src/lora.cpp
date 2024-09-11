@@ -16,7 +16,9 @@
 #define RADIO_DIO1_PIN              33
 #define RADIO_BUSY_PIN              32
 
-static SX1278 radio = new Module(18, 26, 23);
+//static SX1278 radio = new Module(18, 26, 23);
+static SX1276 radio = new Module(18, 26, 23);
+//static SX1262 radio = new Module(18, 26, 23, 33);
 //SX1276 radio = new Module(RADIO_CS_PIN, RADIO_DI0_PIN, RADIO_RST_PIN, RADIO_BUSY_PIN);
 static volatile bool receivedFlag = false;     // flag to indicate that a packet was received
 static volatile bool enableInterrupt = true;   // disable interrupt when it's not needed
@@ -35,10 +37,6 @@ static float packet_rate = 0;
 static uint8_t LORA_newPacketReceivedOLED = 0;
 
 float LORA_currentFrequencyMHz = 434.25f;
-
-
-
-
 
 bool LORA_init(){
     Serial.print(F("[SX1278] Initializing ... "));
@@ -60,7 +58,7 @@ bool LORA_init(){
     radio.setPreambleLength(15);    // set LoRa preamble length to 15 symbols (accepted range is 6 - 65535)
     radio.setGain(0);               // set amplifier gain to 1 (accepted range is 1 - 6, where 1 is maximum gain), 0=AGC
     radio.setCRC(true);
-    radio.setDio0Action(LORA_setFlag);
+    radio.setPacketReceivedAction(LORA_setFlag);
     Serial.print(F("[SX1276] Starting to listen ... "));
 
     return true;
