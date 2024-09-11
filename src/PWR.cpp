@@ -279,7 +279,7 @@ bool PWR_init(){
     // Set the time of pressing the button to turn off
     PMU->setPowerKeyPressOffTime(XPOWERS_POWEROFF_4S);
     uint8_t opt = PMU->getPowerKeyPressOffTime();
-    Serial.print("PowerKeyPressOffTime:");
+    Serial.print("PowerKeyPressOffTime: ");
     switch (opt) {
     case XPOWERS_POWEROFF_4S: Serial.println("4 Second");
         break;

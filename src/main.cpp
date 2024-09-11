@@ -56,6 +56,9 @@ void setup() {
     LORA_changeFrequency(preferences_get_frequency()); 
     Serial.println(F("LORA init done!"));
     OLED_drawString(0, 21, "LORA OK");
+  } else {
+    OLED_drawString(0, 21, "LORA FAIL");
+    while(1){ delay(100); }
   }
 
   //SQL init
