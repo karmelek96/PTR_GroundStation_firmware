@@ -1,20 +1,28 @@
+#include "BOARD.h"
 #include "FileSys.h"
  
 
 bool FS_init(){
+    #ifdef SDCARD_CS
+    if (SD.begin(SDCARD_CS, SDCardSPI)) {
+        uint32_t cardSize = SD.cardSize() / (1024 * 1024);
+        Serial.print("Sd Card init succeeded, The current available capacity is ");
+        Serial.print(cardSize / 1024.0);
+        Serial.println(" GB");
+        return true;
+    } else {
+        Serial.println("Warning: Failed to init Sd Card");
+    }
 
+    #else
+    
     if(!SPIFFS.begin(true)){
        
         return false;
     }
-    //appendFile(SPIFFS, "/log.csv", "\nThis is beginning of new telemetry receiving file, this happensafter every restart of TTGO\n");
-    //appendFile(SPIFFS, "/log.csv", "Timestamp,packet_no,state,flags,accX,accY,accZ,gyroX,gyroY,gyroZ,tilt,pressure,velocity,altitude,lat,lat_sign,lon,lon_sign,altitude_gnss,fix,sats,"
-    //                    "lat_own,lon_own,fix_own,stas_own,distance,direction\n");
 
     return true;
-
-
-  
+    #endif
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){

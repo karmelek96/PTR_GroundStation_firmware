@@ -1,3 +1,4 @@
 #pragma once
 
-void PWR_init();
+bool PWR_init();
+void PWR_loop();
