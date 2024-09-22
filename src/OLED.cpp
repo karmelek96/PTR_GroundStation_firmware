@@ -4,7 +4,7 @@
 #include "TeleMetry.h"
 #include "GNSS.h"
 #include "sensors.h"
-#include "Accessories.h"
+#include "PWR.h"
 #include "lora.h"
 #include <Wire.h>
 #include "SH1106Wire.h"
@@ -152,6 +152,7 @@ void OLED_drawRocketLaunch(){
 
   display->setTextAlignment(TEXT_ALIGN_RIGHT);
   display->setFont(ArialMT_Plain_10); 
+  display->drawStringf(127, 13, buffer, "BAT:  %.2f V", PWR_getBAT());
   display->drawStringf(127, 23, buffer, "vAvi: %.2f V", TM_getVbat());
   
 

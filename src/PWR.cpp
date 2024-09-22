@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include "BOARD.h"
+#include "Accessories.h"
 #include "PWR.h"
 
 
@@ -14,6 +15,8 @@ static void setPmuFlag(){
 }
 
 #endif
+
+static float vbat = 0.0f;
 
 bool PWR_init(){
     #ifdef HAS_PMU
@@ -342,8 +345,13 @@ void PWR_loop(){
     }
     // Clear PMU Interrupt Status Register
     PMU->clearIrqStatus();
+
+    vbat = (float)(PMU->getBattVoltage()) / 1000.0f;
+#else
+    vbat = Accessories_getVBat();
 #endif
 }
 
-
-
+float PWR_getBAT(){
+    return vbat;
+}
