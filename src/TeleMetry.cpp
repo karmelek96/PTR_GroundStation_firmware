@@ -355,9 +355,9 @@ float TM_getVbat(){
 }
 
 void TM_file_write(char * line, uint16_t length){
-	if(*(line+length) == 0){
-		appendFile(SPIFFS, "/log.csv", line);
-	}
+	// if(*(line+length) == 0){
+	// 	appendFile(SPIFFS, "/log.csv", line);
+	// }
 }
 
 bool TM_changeID(int id) {
