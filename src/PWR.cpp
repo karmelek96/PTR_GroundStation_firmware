@@ -335,10 +335,10 @@ void PWR_loop(){
         Serial.println("isPekeyLongPress");
     }
     if (PMU->isBatChargeDoneIrq()) {
-        Serial.println("isBatChagerDone");
+        Serial.println("isBatChargeDone");
     }
     if (PMU->isBatChargeStartIrq()) {
-        Serial.println("isBatChagerStart");
+        Serial.println("isBatChargeStart");
     }
     // Clear PMU Interrupt Status Register
     PMU->clearIrqStatus();
