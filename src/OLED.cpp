@@ -31,32 +31,33 @@ bool OLED_init(String driver){
 #endif
 
   Wire.beginTransmission(DISPLAY_ADDR);
-    if (Wire.endTransmission() == 0) {
-      Serial.printf("Find Display model at 0x%X address\n", DISPLAY_ADDR);
 
-      if(driver == "SSD1306"){
-          display = new SSD1306Wire(DISPLAY_ADDR, SDA, SCL);
-      } else if(driver == "SH1106"){
-          display = new SH1106Wire(DISPLAY_ADDR, SDA, SCL);
-      } else {
-        return true;
-      }
+  if (Wire.endTransmission() == 0) {
+    Serial.printf("Find Display model at 0x%X address\n", DISPLAY_ADDR);
 
-      bool ret = false;
-      ret = display->init();
-      display->flipScreenVertically();  
-      display->setTextAlignment(TEXT_ALIGN_LEFT);
-      display->setFont(ArialMT_Plain_10);
-      display->clear();
-      display->drawXbm(0, 0, 128, 64, splash);
-      display->display();
-      Serial.println(F("SSD1306 ready!"));
-      
-      return ret;
+    if(driver == "SSD1306"){
+        display = new SSD1306Wire(DISPLAY_ADDR, SDA, SCL);
+    } else if(driver == "SH1106"){
+        display = new SH1106Wire(DISPLAY_ADDR, SDA, SCL);
+    } else {
+      return true;
     }
 
-    Serial.printf("Warning: Failed to find Display at 0x%0X address\n", DISPLAY_ADDR);
-    return false;
+    bool ret = false;
+    ret = display->init();
+    display->flipScreenVertically();  
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+    display->setFont(ArialMT_Plain_10);
+    display->clear();
+    display->drawXbm(0, 0, 128, 64, splash);
+    display->display();
+    Serial.println(F("SSD1306 ready!"));
+    
+    return ret;
+  }
+
+  Serial.printf("Warning: Failed to find Display at 0x%0X address\n", DISPLAY_ADDR);
+  return false;
 }
 
 void OLED_changeDriver(String driver){

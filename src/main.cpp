@@ -4,6 +4,7 @@
 #include "string.h"
 #include "Arduino.h"
 
+#include "BOARD.h"
 #include "LORA_typedefs.h"
 #include "TeleMetry.h"
 #include "lora.h"
@@ -15,10 +16,11 @@
 #include "preferences.h"
 #include "SQL.h"
 #include "PWR.h"
+#include <SPI.h>
+#include <Wire.h>
 
 static void getChipInfo();
 static void printWakeupReason();
-static bool beginSDCard();
 static void BOARD_init();
 
 static long RSL_previousMillis = 0;
@@ -308,21 +310,6 @@ static void printWakeupReason(){
 #endif
 }
 
-static bool beginSDCard(){
-#ifdef SDCARD_CS
-    if (SD.begin(SDCARD_CS, SDCardSPI)) {
-        uint32_t cardSize = SD.cardSize() / (1024 * 1024);
-        Serial.print("Sd Card init succeeded, The current available capacity is ");
-        Serial.print(cardSize / 1024.0);
-        Serial.println(" GB");
-        return true;
-    } else {
-        Serial.println("Warning: Failed to init Sd Card");
-    }
-#endif
-    return false;
-}
-
 static void BOARD_init(){
     Serial.begin(115200); //UART
     //Serial.begin();     //USB
@@ -333,27 +320,14 @@ static void BOARD_init(){
 
     getChipInfo();
 
-#if defined(ARDUINO_ARCH_ESP32)
-    //SPI.begin(RADIO_SCLK_PIN, RADIO_MISO_PIN, RADIO_MOSI_PIN);
-#endif
-
-#ifdef HAS_SDCARD
-    SDCardSPI.begin(SDCARD_SCLK, SDCARD_MISO, SDCARD_MOSI);
-#endif
+    SPI.begin(RADIO_SCLK_PIN, RADIO_MISO_PIN, RADIO_MOSI_PIN);
 
 #ifdef I2C_SDA
     Wire.begin(I2C_SDA, I2C_SCL);
-    scanDevices(&Wire);
 #endif
 
 #ifdef HAS_GPS
-#if defined(ARDUINO_ARCH_ESP32)
-    SerialGPS.begin(GPS_BAUD_RATE, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
-#elif defined(ARDUINO_ARCH_STM32)
-    SerialGPS.setRx(GPS_RX_PIN);
-    SerialGPS.setTx(GPS_TX_PIN);
-    SerialGPS.begin(GPS_BAUD_RATE);
-#endif // ARDUINO_ARCH_
+    Serial1.begin(GPS_BAUD_RATE, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 #endif // HAS_GPS
 
 
@@ -388,13 +362,10 @@ static void BOARD_init(){
     digitalWrite(RADIO_LDO_EN, HIGH);
 #endif
 
-#ifdef HAS_SDCARD
-  beginSDCard();
-#endif
 
-#ifdef HAS_GPS
-#ifdef T_BEAM_S3_BPF
-    find_gps = beginGPS();
-#endif
-#endif
+// #ifdef HAS_GPS
+// #ifdef T_BEAM_S3_BPF
+//     find_gps = beginGPS();
+// #endif
+// #endif
 }

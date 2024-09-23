@@ -17,7 +17,6 @@ bool FS_init(){
     } else {
         Serial.println("Warning: Failed to init Sd Card");
     }
-
     #endif
     
     if(!SPIFFS.begin(true)){
@@ -25,7 +24,6 @@ bool FS_init(){
     }
 
     return true;
-    
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){

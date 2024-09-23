@@ -296,7 +296,8 @@ bool PWR_init(){
         break;
     }
 
-
+    #else
+    Accessories_init();
     #endif
 
     return true;
