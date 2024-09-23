@@ -88,7 +88,7 @@ jobs:
             run: |
               cd ./.pio/build/${{ matrix.targets }}/
               mkdir ../artifact
-              zip ../artifact/ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.zip ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.bin
+              zip ../artifact/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}__${{ matrix.targets }}.zip ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.bin
           
           - name: Upload
             uses: actions/upload-release-asset@v1
@@ -96,6 +96,6 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
               upload_url: ${{ needs.create_release.outputs.upload_url }}
-              asset_path: ./.pio/build/artifact/ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.zip
+              asset_path: ./.pio/build/artifact/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}__${{ matrix.targets }}.zip
               asset_name: ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.zip
               asset_content_type: application/zip
