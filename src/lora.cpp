@@ -18,6 +18,7 @@ static SX1262 radio = new Module(RADIO_CS_PIN, RADIO_DIO1_PIN, RADIO_RST_PIN, RA
 
 #endif
 
+static volatile bool LED_blink = false;
 static volatile bool receivedFlag = false;     // flag to indicate that a packet was received
 static volatile bool enableInterrupt = true;   // disable interrupt when it's not needed
 static uint8_t lora_buffer[256];
@@ -81,9 +82,16 @@ void LORA_RXhandler(){
         LORA_timeout_previousMillis = currentMillis;
 
         if(lora_timeout_counter) lora_timeout_counter--;
+
+        if(LED_blink){
+            LED_blink = false;
+            digitalWrite(BOARD_LED, LED_ON);
+        } else {
+            digitalWrite(BOARD_LED, LED_OFF);
+        }
     }
 
-  if (receivedFlag) {
+    if (receivedFlag) {
         // disable the interrupt service routine while
         // processing the data
         enableInterrupt = false;
@@ -97,6 +105,7 @@ void LORA_RXhandler(){
         int state = radio.readData(lora_buffer, radio.getPacketLength());
 
         if (state == RADIOLIB_ERR_NONE) {
+            LED_blink = true;
             packetCounter[0]++;
             LORA_newPacketReceivedOLED = 1;
             TM_parser(lora_buffer, radio.getPacketLength(), radio.getRSSI()); 

@@ -171,8 +171,10 @@
 
 #define BOARD_LED                   25
 #define LED_ON                      HIGH
+#define LED_OFF                     LOW
 
 #define ADC_PIN                     35
+#define BAT_ADC_PIN                 35
 
 #define HAS_SDCARD
 #define HAS_DISPLAY
@@ -212,6 +214,7 @@
 
 #define BOARD_LED                   25
 #define LED_ON                      HIGH
+#define LED_OFF                     LOW
 
 #define ADC_PIN                     35
 
@@ -265,6 +268,7 @@
 
 #define BOARD_LED                   25
 #define LED_ON                      HIGH
+#define LED_OFF                     LOW
 
 #define ADC_PIN                     35
 
@@ -329,6 +333,7 @@
 
 #define BOARD_LED                   37
 #define LED_ON                      HIGH
+#define LED_OFF                     LOW
 
 #define BUTTON_PIN                  0
 #define ADC_PIN                     1
@@ -506,6 +511,7 @@
 
 #define BOARD_LED               7
 #define LED_ON                   HIGH
+#define LED_OFF                  LOW
 #define RADIO_RX_PIN                15
 #define RADIO_TX_PIN                14
 
