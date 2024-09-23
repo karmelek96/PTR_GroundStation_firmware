@@ -5,6 +5,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            targets: [ttgo-t-beam-sx1278, ttgo-t-beam-sx1276, ttgo-t-beam-sx1262, ttgo-t3-v1_3-sx1278, ttgo-t3-v1_3-sx1276, ttgo-t3-v1_6-sx1278, ttgo-t3-v1_6-sx1276]
     steps:
       # Checkout repository
       - name: Checkout code
@@ -26,5 +29,5 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Build PlatformIO Project
-        run: pio run
+      - name: Build PlatformIO Project for ${{ matrix.targets }}
+        run: pio ci --environment ${{ matrix.targets }}
