@@ -1,9 +1,10 @@
 #include "Arduino.h"
+#include "BOARD.h"
 #include "LORA_typedefs.h"
 #include "TeleMetry.h"
 #include "GNSS.h"
 #include "sensors.h"
-#include "Accessories.h"
+#include "PWR.h"
 #include "lora.h"
 #include <Wire.h>
 #include "SH1106Wire.h"
@@ -13,10 +14,7 @@
 
 
 //---------------- OLED declarations -------------------------
-static SSD1306Wire display1(0x3c, SDA, SCL);
-static SH1106Wire display2(0x3c, SDA, SCL);
-static SH1106Wire * display = &display2;
-
+static OLEDDisplay * display;
 static char buffer[128];
 
 static long OLED_previousMillis = 0;
@@ -25,10 +23,22 @@ static long OLED_interval = 100;
 static long OLED_newPacketCounter = 0;
 
 bool OLED_init(String driver){
+#if OLED_RST
+    pinMode(OLED_RST, OUTPUT);
+    digitalWrite(OLED_RST, HIGH); delay(20);
+    digitalWrite(OLED_RST, LOW);  delay(20);
+    digitalWrite(OLED_RST, HIGH); delay(20);
+#endif
+
+  Wire.beginTransmission(DISPLAY_ADDR);
+
+  if (Wire.endTransmission() == 0) {
+    Serial.printf("Find Display model at 0x%X address\n", DISPLAY_ADDR);
+
     if(driver == "SSD1306"){
-        display = (SH1106Wire*)&display1;
+        display = new SSD1306Wire(DISPLAY_ADDR, SDA, SCL);
     } else if(driver == "SH1106"){
-        display = (SH1106Wire*)&display2;
+        display = new SH1106Wire(DISPLAY_ADDR, SDA, SCL);
     } else {
       return true;
     }
@@ -44,6 +54,10 @@ bool OLED_init(String driver){
     Serial.println(F("SSD1306 ready!"));
     
     return ret;
+  }
+
+  Serial.printf("Warning: Failed to find Display at 0x%0X address\n", DISPLAY_ADDR);
+  return false;
 }
 
 void OLED_changeDriver(String driver){
@@ -127,11 +141,11 @@ void OLED_drawRocketLaunch(){
      display->drawStringf(0, 13, buffer,"%.2f km", TM_getGeoAltitude() / 1000.0f);
   }
   
-  display->drawStringf(0, 23, buffer, "%c%.7f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
-  display->drawStringf(0, 33, buffer, "%c%.7f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
+  display->drawStringf(0, 23, buffer, "%c%.6f", TM_getGeoLatitude().sign,  fabs(TM_getGeoLatitude().cord));
+  display->drawStringf(0, 33, buffer, "%c%.6f", TM_getGeoLongitude().sign, fabs(TM_getGeoLongitude().cord));
 
   //RF freq and ID
-  display->drawStringf(0, 53, buffer, "%.3fMHz", LORA_getCurrentFrequency());
+  display->drawStringf(0, 53, buffer, "%.2fMHz", LORA_getCurrentFrequency());
   
   
   display->drawStringf(0, 43, buffer, "ID: %d", TM_getID());
@@ -139,6 +153,7 @@ void OLED_drawRocketLaunch(){
 
   display->setTextAlignment(TEXT_ALIGN_RIGHT);
   display->setFont(ArialMT_Plain_10); 
+  display->drawStringf(127, 13, buffer, "BAT:  %.2f V", PWR_getBAT());
   display->drawStringf(127, 23, buffer, "vAvi: %.2f V", TM_getVbat());
   
 
@@ -245,6 +260,13 @@ void OLED_clear(){
 void OLED_drawString(uint16_t x, uint16_t y, const String &text){
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->setFont(ArialMT_Plain_10);
+  display->drawString(x, y, text);
+  display->display();
+}
+
+void OLED_drawLargeString(uint16_t x, uint16_t y, const String &text){
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->setFont(ArialMT_Plain_16);
   display->drawString(x, y, text);
   display->display();
 }

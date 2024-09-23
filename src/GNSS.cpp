@@ -1,14 +1,11 @@
 #include "Arduino.h"
 #include <math.h>
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h> 
-#include <MicroNMEA.h>
 #include "GNSS.h"
 
 
 //------ GNSS -------------
 SFE_UBLOX_GNSS myGNSS;
-char nmeaBuffer[100];
-MicroNMEA nmea(nmeaBuffer, sizeof(nmeaBuffer));
 
 //----- Global vars --------
 float myLat    = 0.0f;
@@ -17,13 +14,13 @@ uint8_t myFix  = 0;
 uint8_t mySats = 0;
 
 bool GNSS_init(){
-    Serial1.begin(9600, SERIAL_8N1, 34, 12);
-
+    #if defined(HAS_GPS)
     if (myGNSS.begin(Serial1) == false) {
-        Serial.println(F("Ublox init Failed. Freezing."));
+        Serial.println(F("Ublox init Failed."));
         //while (1);
         return false;
     }
+    #endif
     return true;
 }
 
@@ -32,6 +29,7 @@ double toRad(double degree) {
 }
 
 void GNSS_srv(){
+    #if defined(HAS_GPS)
     if(myGNSS.checkUblox()){
         if (nmea.isValid() == true) {
             long latitude_mdeg = nmea.getLatitude();
@@ -45,6 +43,7 @@ void GNSS_srv(){
             mySats = 0;
         }
     }
+    #endif
 }
 
 float GNSS_calcDistance(float targetLat, float targetLon){
@@ -90,11 +89,4 @@ uint8_t GNSS_getOwnFix(){
 
 uint8_t GNSS_getOwnSat(){
     return mySats;
-}
-
-void SFE_UBLOX_GNSS::processNMEA(char incoming)
-{
-    //Take the incoming char from the Ublox I2C port and pass it on to the MicroNMEA lib
-    //for sentence cracking
-    nmea.process(incoming);
 }
