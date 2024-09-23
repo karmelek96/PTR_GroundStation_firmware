@@ -30,6 +30,4 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO Project for ${{ matrix.targets }}
-        run: pio ci --lib="." --environment ${{ matrix.targets }}
-        env:
-            PLATFORMIO_CI_SRC: src/main.cpp
+        run: pio run --environment ${{ matrix.targets }}
