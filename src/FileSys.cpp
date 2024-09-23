@@ -1,8 +1,13 @@
 #include "BOARD.h"
 #include "FileSys.h"
 
+#if defined(HAS_SDCARD)
+#include <SD.h>
+SPIClass SDCardSPI(HSPI);
+#endif
+
 bool FS_init(){
-    #ifdef SDCARD_CS
+    #ifdef HAS_SDCARD
     if (SD.begin(SDCARD_CS, SDCardSPI)) {
         uint32_t cardSize = SD.cardSize() / (1024 * 1024);
         Serial.print("Sd Card init succeeded, The current available capacity is ");
