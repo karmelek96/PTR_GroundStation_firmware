@@ -31,3 +31,5 @@ jobs:
 
       - name: Build PlatformIO Project for ${{ matrix.targets }}
         run: pio ci --environment ${{ matrix.targets }}
+        env:
+            PLATFORMIO_CI_SRC: main.cpp
