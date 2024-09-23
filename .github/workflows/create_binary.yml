@@ -22,8 +22,31 @@ on:
                 description: 'Is this a prerelease?'
             
 jobs:
-    create-release:
+    create_release:
+        name: Create Release
         runs-on: ubuntu-latest
+        outputs:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+        steps:
+          - name: Create Release
+            id: create_release
+            uses: actions/create-release@v1
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                tag_name: ${{ github.event.inputs.releaseTag }}
+                release_name: ${{ github.event.inputs.releaseTitle }}
+                body: ${{ github.event.inputs.releaseDescription }}
+                prerelease: ${{ github.event.inputs.releasePreRelease }}
+                draft: false
+        
+    build_release:
+        name: Build release
+        needs: create_release
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                targets: [ttgo-t-beam-sx1278, ttgo-t-beam-sx1276, ttgo-t-beam-sx1262, ttgo-t3-v1_3-sx1278, ttgo-t3-v1_3-sx1276, ttgo-t3-v1_6-sx1278, ttgo-t3-v1_6-sx1276]
         steps:
           # Checkout repository
           - name: Checkout code
@@ -45,28 +68,34 @@ jobs:
           - name: Install PlatformIO Core
             run: pip install --upgrade platformio
 
-          - name: Build PlatformIO Project
-            run: pio run
+          - name: Build PlatformIO Project for ${{ matrix.targets }}
+            run: pio run --environment ${{ matrix.targets }}
 
           - name: Build SPIFFS
-            run: pio run --target buildfs --environment ttgo-t-beam
+            run: pio run --target buildfs --environment ${{ matrix.targets }}
 
           - name: Install Espressif tools
             run: pip install esptool
 
           - name: Create unified binary
             run:  |
-                  cd ./.pio/build/ttgo-t-beam/
+                  cd ./.pio/build/${{ matrix.targets }}/
                   esptool.py --chip ESP32 merge_bin -o flash.bin --flash_mode dio --flash_size 4MB 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin 0x210000 spiffs.bin
-                  mv flash.bin ptr_gs_firmware_${{ github.event.inputs.releaseTag }}.bin
-
-          - name: Create GitHub Release
-            uses: softprops/action-gh-release@v2
+                  mv flash.bin ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.bin
+                  
+          - name: Compress
+            shell: bash
+            run: |
+              cd ./.pio/build/${{ matrix.targets }}/
+              mkdir ../artifact
+              zip ../artifact/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}__${{ matrix.targets }}.zip ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.bin
+          
+          - name: Upload
+            uses: actions/upload-release-asset@v1
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
-              files: ./.pio/build/ttgo-t-beam/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}.bin
-              tag_name: ${{ github.event.inputs.releaseTag }}
-              name: ${{ github.event.inputs.releaseTitle }}
-              body: ${{ github.event.inputs.releaseDescription }}
-              prerelease: ${{ github.event.inputs.releasePreRelease }}
-              draft: false
-              make_latest: true
+              upload_url: ${{ needs.create_release.outputs.upload_url }}
+              asset_path: ./.pio/build/artifact/ptr_gs_firmware_${{ github.event.inputs.releaseTag }}__${{ matrix.targets }}.zip
+              asset_name: ptr_gs_firmware_${{ matrix.targets }}_${{ github.event.inputs.releaseTag }}.zip
+              asset_content_type: application/zip

@@ -83,12 +83,14 @@ void LORA_RXhandler(){
 
         if(lora_timeout_counter) lora_timeout_counter--;
 
+#ifdef BOARD_LED
         if(LED_blink){
             LED_blink = false;
             digitalWrite(BOARD_LED, LED_ON);
         } else {
             digitalWrite(BOARD_LED, LED_OFF);
         }
+#endif
     }
 
     if (receivedFlag) {

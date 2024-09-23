@@ -10,18 +10,18 @@
 
 
 // Support board list , Macro definition below, select the board definition to be used
-
+#if !defined(CI_BUILD)
 //#define LORA32_SX1278
 
 // #define T_BEAM_SX1262
 // #define T_BEAM_SX1276
-//#define T_BEAM_SX1278
+#define T_BEAM_SX1278
 
 // #define T3_V1_3_SX1276
 // #define T3_V1_3_SX1278
 
 // #define T3_V1_6_SX1276
-#define T3_V1_6_SX1278
+// #define T3_V1_6_SX1278
 
 // #define T3_V1_6_SX1276_TCXO
 // #define T3_V3_0_SX1276_TCXO
@@ -40,6 +40,7 @@
 // #define T3_C6
 
 // #define T_BEAM_S3_BPF
+#endif
 
 
 #define UNUSED_PIN                   (0)
@@ -121,7 +122,7 @@
 #define RADIO_MISO_PIN              19
 #define RADIO_MOSI_PIN              27
 #define RADIO_CS_PIN                18
-#define RADIO_DIO0_PIN               26
+#define RADIO_DIO0_PIN              26
 #define RADIO_RST_PIN               14
 #define RADIO_DIO1_PIN              33
 
