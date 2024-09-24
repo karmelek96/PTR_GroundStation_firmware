@@ -5,7 +5,7 @@ Firmware for the TTGO family of ESP32 / LoRa / OLED boards, that turns them into
 1. Download and unzip the latest binary for your board from the [releases](https://github.com/PTR-projects/PTR_GroundStation_firmware/releases/latest) section.
 2. Flash the binary onto the board, with address offset 0. [You can use this online tool](https://espressif.github.io/esptool-js/) which is compatible with most popular browsers.
 To do this, plug your board into your computer, power it on, and select it from the COM port list. Select the .bin file you downloaded, set the flash address offset to `0x0`, and click program.
-Note: if you're having problems, try a different browser.
+**Note: If you're having problems, try a different browser.**
 ![image](https://github.com/user-attachments/assets/0a8ee731-6ea4-45b8-bbbe-b01a5d15f8f0)
 
    
@@ -21,9 +21,9 @@ The display should be fixed, and the board is ready to receive telemetry.
 ### Display
 Important parameters are displayed on the OLED display.
 ![image](https://github.com/user-attachments/assets/30f719f9-cf0c-4b11-9134-577d8493df3d)
-Note: To be able to use the bearing and distance readouts, you must have a GPS-equipped board.
+**Note: To be able to use the bearing and distance readouts, you must have a GPS-equipped board.**
 
-Note: If the signal with the selected device is lost, the packet rate readout will change into a counter which will display how many seconds have elapsed since a packet was last received.
+**Note: If the signal with the selected device is lost, the packet rate readout will change into a counter which will display how many seconds have elapsed since a packet was last received.**
 ![image](https://github.com/user-attachments/assets/2a844e23-0c5e-46e3-8cec-db363d5423bc)
 ### Device ID 
 The ID is a way of differentiating devices that transmit on the same frequency. This allows one groundstation to receive many telemetry streams (for example form a multistage vehicle, or an event with many launches).
