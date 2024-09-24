@@ -192,8 +192,12 @@ void setup() {
   });
 
   server.begin();
-
   delay(2000);
+
+  OLED_clear();
+  OLED_drawSplash();
+  delay(2000);  
+
   OLED_clear();
   OLED_drawLargeString(0, 15, "WiFi AP:");
   OLED_drawLargeString(0, 34, ssid);
