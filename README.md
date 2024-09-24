@@ -1,5 +1,6 @@
+[Instrukcja w języku polskim](https://github.com/PTR-projects/PTR_GroundStation_firmware/edit/readme_instructions/README_PL.md)
 # PTR Groundstation
-Firmware for the TTGO family of ESP32 / LoRa / OLED boards, that turn them into powerful groundstations for avionics systems developed by [PTR-Projects](https://github.com/PTR-projects).
+Firmware for the TTGO family of ESP32 / LoRa / OLED boards, that turns them into powerful groundstations for avionics systems developed by [PTR-Projects](https://github.com/PTR-projects).
 ## Installation and setup
 1. Download and unzip the latest binary for your board from the [releases](https://github.com/PTR-projects/PTR_GroundStation_firmware/releases/latest) section.
 2. Flash the binary onto the board, with address offset 0. [You can use this online tool](https://espressif.github.io/esptool-js/) which is compatible with most popular browsers.
