@@ -1,4 +1,4 @@
-[Instrukcja w języku polskim](https://github.com/PTR-projects/PTR_GroundStation_firmware/edit/readme_instructions/README_PL.md)
+[Instrukcja w języku polskim](README_PL.md)
 # PTR Groundstation
 Firmware for the TTGO family of ESP32 / LoRa / OLED boards, that turns them into powerful groundstations for avionics systems developed by [PTR-Projects](https://github.com/PTR-projects).
 ## Installation and setup
