@@ -12,7 +12,7 @@ To wszystko. Jeśli wyśwetlacz działa ale wydaje się zepsuty, wykonaj następ
 
 3. Połącz się z siecią płytki. Powinna zaczynać się od `PTR-GS`. Jeśli łączysz się z telefonu, wyłącz dane komórkowe.
 4. W przeglądarce otwórz adres `192.168.4.1`
-5. Zjedź do `Change OLED driver`, zmień, i kliknij `Change driver`.
+5. Zjedź do sekcji `Change OLED driver`. Następnie, wybierz inny sterownik z listy i kliknij `Change driver` żeby zapisać zmiany.
 
 Wyświetlacz powinien byc naprawiony, i płytka jest gotowa do odbioru telemetrii.
 
@@ -20,7 +20,7 @@ Wyświetlacz powinien byc naprawiony, i płytka jest gotowa do odbioru telemetri
 ### Wyświetlacz
 Na wyświetlaczu OLED wyświetlane są najważniejsze dane.
 ![image](https://github.com/user-attachments/assets/29279de8-3483-4a6a-8c66-add6b64d519e)
-**Uwaga: Żeby moć używać funkcji odczytu odległości i azymutu, musisz mieć płytkę wyposażoną w GPS.**
+**Uwaga: Żeby moć używać funkcji odczytu odległości do celu i azymutu, musisz mieć płytkę wyposażoną w GPS.**
 
 **Uwaga: W przypadku utraty sygnału od wybranego ID, wskaźnik częstotliwości odbierania ramek zamieni się na licznik sekund od ostatniej odebranej ramki.**
 ![image](https://github.com/user-attachments/assets/2a844e23-0c5e-46e3-8cec-db363d5423bc)

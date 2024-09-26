@@ -11,9 +11,9 @@ To do this, plug your board into your computer, power it on, and select it from 
    
 At this point you're done. If the display works, but appears broken, follow the next steps.
 
-3. Connect to the board's wifi network, it should start with `PTR-GS`. You may need to disable mobile data when connecting from a phone.
+3. Connect to the board's wifi network. It should start with `PTR-GS`. You may need to disable mobile data when connecting from a phone.
 4. Open your browser and go to `192.168.4.1`
-5. Scroll down to `Change OLED driver`, change it, and click `Change driver`.
+5. Scroll down to `Change OLED driver`. Next, open the dropdown menu, and pick a different driver. Lastly, click `Change driver` to save changes.
 
 The display should be fixed, and the board is ready to receive telemetry.
 
@@ -21,7 +21,7 @@ The display should be fixed, and the board is ready to receive telemetry.
 ### Display
 Important parameters are displayed on the OLED display.
 ![image](https://github.com/user-attachments/assets/30f719f9-cf0c-4b11-9134-577d8493df3d)
-**Note: To be able to use the bearing and distance readouts, you must have a GPS-equipped board.**
+**Note: To be able to use the bearing and distance to target readouts, you must have a GPS-equipped board.**
 
 **Note: If the signal with the selected device is lost, the packet rate readout will change into a counter which will display how many seconds have elapsed since a packet was last received.**
 ![image](https://github.com/user-attachments/assets/2a844e23-0c5e-46e3-8cec-db363d5423bc)
