@@ -10,7 +10,7 @@ Oprogramowanie do płytek ESP32 / LoRa / OLED z rodziny TTGO, które zmienia je 
    
 To wszystko. Jeśli wyśwetlacz działa ale wydaje się zepsuty, wykonaj następne kroki.
 
-3. Połącz się z siecią płytki. Powinna zaczynać się od `PTR-GS`. Jeśli łączysz się z telefonu, wyłącz dane komórkowe.
+3. Połącz się z siecią wifi płytki. Powinna zaczynać się od `PTR-GS`. Jeśli łączysz się z telefonu, wyłącz dane komórkowe.
 4. W przeglądarce otwórz adres `192.168.4.1`
 5. Zjedź do sekcji `Change OLED driver`. Następnie, wybierz inny sterownik z listy i kliknij `Change driver` żeby zapisać zmiany.
 
