@@ -30,6 +30,13 @@ const char *ssid_base = "PTR-GS";
 
 AsyncWebServer server(80);
 
+#ifdef VERSION_TAG
+  const char *version = VERSION_TAG;
+#else
+  const char *version = "?";
+#endif
+
+
 void setup() {
   uint8_t mac[6];
   char ssid[12];
@@ -192,8 +199,13 @@ void setup() {
   });
 
   server.begin();
-
+  OLED_drawString(0, 53, version);
   delay(2000);
+
+  OLED_clear();
+  OLED_drawSplash();
+  delay(2000);  
+
   OLED_clear();
   OLED_drawLargeString(0, 15, "WiFi AP:");
   OLED_drawLargeString(0, 34, ssid);

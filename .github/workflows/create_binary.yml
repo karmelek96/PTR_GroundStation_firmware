@@ -68,6 +68,9 @@ jobs:
           - name: Install PlatformIO Core
             run: pip install --upgrade platformio
 
+          - name: Set version sysenv
+            run: echo "VERSION_TAG=${{ github.event.inputs.releaseTag }}" >> $GITHUB_ENV
+
           - name: Build PlatformIO Project for ${{ matrix.targets }}
             run: pio run --environment ${{ matrix.targets }}
 

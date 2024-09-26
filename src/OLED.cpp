@@ -270,3 +270,8 @@ void OLED_drawLargeString(uint16_t x, uint16_t y, const String &text){
   display->drawString(x, y, text);
   display->display();
 }
+
+void OLED_drawSplash() {
+  display->drawXbm(0, 0, 128, 64, splash);
+  display->display();
+}
