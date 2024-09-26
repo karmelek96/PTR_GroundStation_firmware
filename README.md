@@ -1,92 +1,40 @@
-# KP-PTR-GroundStation
+[Instrukcja w języku polskim](README_PL.md)
+# PTR Groundstation
+Firmware for the TTGO family of ESP32 / LoRa / OLED boards, that turns them into powerful groundstations for avionics systems developed by [PTR-Projects](https://github.com/PTR-projects).
+## Installation and setup
+1. Download and unzip the latest binary for your board from the [releases](https://github.com/PTR-projects/PTR_GroundStation_firmware/releases/latest) section.
+2. Flash the binary onto the board, with address offset 0. [You can use this online tool](https://espressif.github.io/esptool-js/) which is compatible with most popular browsers.
+To do this, plug your board into your computer, power it on, and select it from the COM port list. Select the .bin file you downloaded, set the flash address offset to `0x0`, and click program.
+**Note: If you're having problems, try a different browser.**
+![image](https://github.com/user-attachments/assets/0a8ee731-6ea4-45b8-bbbe-b01a5d15f8f0)
 
+   
+At this point you're done. If the display works, but appears broken, follow the next steps.
 
+3. Connect to the board's wifi network. It should start with `PTR-GS`. You may need to disable mobile data when connecting from a phone.
+4. Open your browser and go to `192.168.4.1`
+5. Scroll down to `Change OLED driver`. Next, open the dropdown menu, and pick a different driver. Lastly, click `Change driver` to save changes.
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/space.tech/kp-ptr-groundstation.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.com/space.tech/kp-ptr-groundstation/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The display should be fixed, and the board is ready to receive telemetry.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Display
+Important parameters are displayed on the OLED display.
+![image](https://github.com/user-attachments/assets/30f719f9-cf0c-4b11-9134-577d8493df3d)
+**Note: To be able to use the bearing and distance to target readouts, you must have a GPS-equipped board.**
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Note: If the signal with the selected device is lost, the packet rate readout will change into a counter which will display how many seconds have elapsed since a packet was last received.**
+![image](https://github.com/user-attachments/assets/2a844e23-0c5e-46e3-8cec-db363d5423bc)
+### Device ID 
+The ID is a way of differentiating devices that transmit on the same frequency. This allows one groundstation to receive many telemetry streams (for example form a multistage vehicle, or an event with many launches).
+The ID setting allows you to choose which device you want to receive, effectively acting as a filter. If you want to receive all devices on a given frequency, set the ID to `0`.
+### WebGUI
+The WebGUI is how the settings on the device can be changed. To access the WebGUI, connect to the wifi network created by the ground station. It starts with `PTR-GS`, but the unique name is displayed on the screen during powerup.
+Next, open your browser and go to `192.168.4.1`. If you're on a mobile device, you may need to disable mobile data.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Here are some things you can do in the WebGUI:
+- Change the ground station settings, tune the radio, set the ID filter.
+- View all telemetry streams in a table, organized by ID.
+- View telemetry of a specific device, and open its location in Google maps, for easy recovery.
+- Download raw telemetry CSV logs, which contain extra information like apogee and GPS satellite number.
+![image](https://github.com/user-attachments/assets/533af8c4-557c-4127-bcf6-4d2ef12ad76f)
